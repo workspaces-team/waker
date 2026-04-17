@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@workspaces-team/waker-config": ["packages/waker-config/src/index.ts"],
+      "@workspaces-team/waker-config/*": ["packages/waker-config/src/*"],
+      "@workspaces-team/waker-web": ["packages/waker-web/src/index.ts"],
+      "@workspaces-team/waker-web/*": ["packages/waker-web/src/*"]
+    }
+  }
+}

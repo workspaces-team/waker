@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "bundleType": "waker-runtime-deliverable",
+  "family": "waker-web",
+  "cohortId": "2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1",
+  "surfaceId": "2026-04-16-surface-audio-official-first-run-single-word-registration-v1",
+  "releaseId": "2026-04-15-release-official-first-run-abstract-wake-v1",
+  "createdAtUtc": "2026-04-16T22:03:55.099Z",
+  "registrationPolicy": "single_word_only",
+  "routingRole": "diagnostic_only",
+  "decisionSurface": "head_assess",
+  "backbone": {
+    "implementation": "waker-tiny-temporal-conv-v1",
+    "packageManifestPath": "backbone/package.manifest.json",
+    "modelPath": "backbone/model.onnx"
+  },
+  "head": {
+    "modelPath": "head/model.npz",
+    "configPath": "head/config.json"
+  },
+  "evidence": {
+    "reportMarkdownPath": "evidence/academy-report.md",
+    "reportJsonPath": "evidence/academy-report.json",
+    "headTrainResultPath": "evidence/manifold-head-result.json",
+    "headAssessResultPath": "evidence/manifold-head-assess.json",
+    "routingReviewPath": "evidence/routing-review.json"
+  },
+  "runtimeConfigPath": "runtime-config.json",
+  "policyPath": "policy.json",
+  "registrationDir": "registration",
+  "frontendConfigPath": "frontend.json",
+  "activeRegistrationPath": "registration.json",
+  "selectedKeyword": "Operator",
+  "selectedRegistrationPolicy": "single_word_only",
+  "selectedDetectorConfigPath": "registration/operator/detector.json"
+}

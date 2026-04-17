@@ -1,0 +1,67 @@
+{
+  "name": "@workspaces-team/waker-web",
+  "version": "0.0.0-alpha.1",
+  "type": "module",
+  "description": "Browser-side wake-word detection runtime for Waker.",
+  "license": "MIT",
+  "homepage": "https://waker.live",
+  "bugs": {
+    "url": "https://github.com/workspaces-team/waker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/workspaces-team/waker.git",
+    "directory": "packages/waker-web"
+  },
+  "keywords": [
+    "wake-word",
+    "browser",
+    "wasm",
+    "audio",
+    "detection",
+    "vite"
+  ],
+  "packageManager": "pnpm@10.33.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./custom-detector": {
+      "types": "./dist/custom-detector.d.ts",
+      "import": "./dist/custom-detector.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "runtime",
+    "runtime-assets.manifest.json",
+    "README.md",
+    "CONTRIBUTING.md",
+    "RELEASING.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf ./dist && bun build ./src/index.ts ./src/custom-detector.ts ./src/vite.ts ./src/runtime-common.ts ./src/types.ts --outdir ./dist --format esm && tsc -p tsconfig.json --emitDeclarationOnly --declaration --declarationMap false",
+    "sync:runtime-assets": "bun ./scripts/sync-sdk-web-runtime-assets.ts",
+    "sync:wasm": "bun ./scripts/sync-sdk-wasm.ts",
+    "sync:vad-wasm": "bun ./scripts/sync-sdk-vad-wasm.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
+  }
+}

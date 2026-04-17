@@ -1,0 +1,32 @@
+{
+  "description": "Runtime asset manifest for @workspaces-team/waker-web. Documents which Academy deliverable bundles are copied into the package runtime and which WASM-native backbone files are injected for browser compatibility.",
+  "policies": [
+    {
+      "policy": "single_word_only",
+      "cohortId": "2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1",
+      "runtimeDir": "single-word-only"
+    }
+  ],
+  "compatibilityBackbone": {
+    "weightsBinary": "lib/extensions/sdk-wasm/model/backbone_16k.bin",
+    "manifestJson": "lib/extensions/sdk-wasm/model/backbone_16k_manifest.json",
+    "destinationModelPath": "backbone/model.bin",
+    "destinationManifestPath": "backbone/model_manifest.json"
+  },
+  "copyContract": {
+    "fromDeliverableBundle": [
+      "registration.json",
+      "runtime-config.json",
+      "policy.json",
+      "bundle.manifest.json",
+      "frontend.json",
+      "registration/**"
+    ],
+    "rewrittenForBrowserRuntime": [
+      "registration.json",
+      "runtime-config.json",
+      "bundle.manifest.json",
+      "registration/*/detector.json"
+    ]
+  }
+}

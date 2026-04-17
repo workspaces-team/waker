@@ -1,0 +1,81 @@
+{
+  "name": "@workspaces-team/waker-config",
+  "version": "0.0.0-alpha.1",
+  "type": "module",
+  "description": "Browser-side tiny-head config, artifact, and training utilities for Waker.",
+  "license": "MIT",
+  "homepage": "https://waker.live",
+  "bugs": {
+    "url": "https://github.com/workspaces-team/waker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/workspaces-team/waker.git",
+    "directory": "packages/waker-config"
+  },
+  "keywords": [
+    "wake-word",
+    "browser",
+    "wasm",
+    "audio",
+    "tiny-head",
+    "vite"
+  ],
+  "packageManager": "pnpm@10.33.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "bin": {
+    "waker-config": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./head-trainer": {
+      "types": "./dist/head-trainer.d.ts",
+      "import": "./dist/head-trainer.js"
+    },
+    "./config-template": {
+      "types": "./dist/config-template.d.ts",
+      "import": "./dist/config-template.js"
+    },
+    "./runtime-common": {
+      "types": "./dist/runtime-common.d.ts",
+      "import": "./dist/runtime-common.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "runtime",
+    "runtime-assets.manifest.json",
+    "README.md",
+    "CONTRIBUTING.md",
+    "RELEASING.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf ./dist && bun build ./src/index.ts ./src/head-trainer.ts ./src/config-template.ts ./src/cli.ts ./src/runtime-common.ts ./src/types.ts ./src/vite.ts --outdir ./dist --format esm && chmod +x ./dist/cli.js && tsc -p tsconfig.json --emitDeclarationOnly --declaration --declarationMap false",
+    "sync:runtime-assets": "bun ./scripts/sync-runtime-assets.ts",
+    "sync:wasm": "bun ./scripts/sync-wasm.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
+  }
+}

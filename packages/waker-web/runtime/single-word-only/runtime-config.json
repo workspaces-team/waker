@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "bundleId": "2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1",
+  "modality": "audio",
+  "releaseId": "2026-04-15-release-official-first-run-abstract-wake-v1",
+  "registrationPolicy": "single_word_only",
+  "routingRole": "diagnostic_only",
+  "decisionSurface": "head_assess",
+  "backbone": {
+    "implementation": "waker-tiny-temporal-conv-v1",
+    "packageManifestPath": "backbone/model_manifest.json",
+    "modelPath": "backbone/model.bin",
+    "sequenceLength": 49,
+    "embeddingDim": 96,
+    "inputDim": 32,
+    "sampleRate": 16000,
+    "clipDurationSeconds": 2,
+    "inputMelFrames": 198
+  },
+  "frontend": {
+    "configPath": "frontend.json",
+    "frameLength": 400,
+    "hopLength": 160,
+    "nMels": 32,
+    "sampleRate": 16000,
+    "inputMelFrames": 198
+  },
+  "head": {
+    "format": "manifold_head_npz",
+    "modelPath": "head/model.npz",
+    "configPath": "head/config.json",
+    "decisionThreshold": 0.5
+  },
+  "policyPath": "policy.json",
+  "registrationsDir": "registration",
+  "activeRegistrationPath": "registration.json",
+  "activeDetectorConfigPath": "registration/operator/detector.json"
+}

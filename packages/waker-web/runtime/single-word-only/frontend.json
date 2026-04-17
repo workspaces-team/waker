@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "frontendFormat": "waker-owned-mel-frontend-v1",
+  "sampleRate": 16000,
+  "clipDurationSeconds": 2,
+  "frameLength": 400,
+  "hopLength": 160,
+  "nMels": 32,
+  "inputMelFrames": 198
+}
