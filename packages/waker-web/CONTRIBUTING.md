@@ -18,4 +18,4 @@ running sync commands.
 2. Treat runtime assets as vendored snapshots with a declared source-of-truth copy contract.
 3. Keep runtime metadata explicit and versioned.
 4. Preserve the single-word-only default until newer policy evidence displaces it.
-5. Document every browser compatibility bridge, especially around backbone asset shape.
+5. Keep VAD concerns out of this package; they belong in `@workspaces-team/waker-vad`.

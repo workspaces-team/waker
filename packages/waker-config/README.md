@@ -1,44 +1,22 @@
 # @workspaces-team/waker-config
 
-> Active development, very early release.
->
-> If you hit a bug or confusing edge case, please open an issue. We are actively validating and
-> verifying this public package shape.
+[![npm version](https://img.shields.io/npm/v/%40workspaces-team%2Fwaker-config?color=111827&label=npm)](https://www.npmjs.com/package/@workspaces-team/waker-config)
+[![CI](https://github.com/workspaces-team/waker/actions/workflows/ci.yml/badge.svg)](https://github.com/workspaces-team/waker/actions/workflows/ci.yml)
+
+Single-word browser wake-word training, config generation, and artifact utilities for Waker.
+
+This is the training-side package in the Waker web stack. It builds starter configs, trains browser
+tiny heads, and serializes the resulting artifacts for later use in
+[`@workspaces-team/waker-web`](https://github.com/workspaces-team/waker/tree/main/packages/waker-web#readme).
 
 Website: `https://waker.live`  
 Issues: `https://github.com/workspaces-team/waker/issues`
 
-Browser-side tiny-head configuration, artifact, and training utilities for Waker.
+Why use it:
 
-This package is the publishable training/config half of the web stack. It contains:
-
-- tiny-head training types
-- head artifact serialization helpers
-- bundled runtime path helpers
-- the browser/WASM-backed head trainer
-
-It does **not** provide the runtime wake-word detector itself. For detection, use
-[`@workspaces-team/waker-web`](../waker-web/README.md).
-
-## Quick start
-
-```bash
-npx @workspaces-team/waker-config --keyword "Operator"
-```
-
-That writes a starter `waker-head.config.json` using the current single-word defaults.
-
-If you want a different output path:
-
-```bash
-npx @workspaces-team/waker-config --keyword "Operator" --out ./config/waker-head.config.json
-```
-
-If you want to inspect the JSON without writing a file:
-
-```bash
-npx @workspaces-team/waker-config --keyword "Operator" --stdout
-```
+- train single-word wake targets without standing up a hosted training stack
+- keep artifact generation in the same browser environment that will consume the runtime
+- export portable tiny-head artifacts that can move cleanly into product surfaces
 
 ## Install
 
@@ -46,55 +24,38 @@ npx @workspaces-team/waker-config --keyword "Operator" --stdout
 npm install @workspaces-team/waker-config
 ```
 
-For a Vite app you will usually install it alongside `vite`:
+For Vite projects:
 
 ```bash
 npm install @workspaces-team/waker-config vite
 ```
 
-## Package goals
+## Quick Start
 
-This package is designed to stand on its own as an open-source npm package. It vendors the runtime
-assets needed for browser-side tiny-head training so consumers can install it and build it without
-depending on a larger private workspace at runtime.
-
-## Package runtime assets
-
-This package is intended to be publishable and self-contained. Its browser-side trainer depends on:
-
-- `runtime/wasm/*` — the synced Rust/WASM module
-- `runtime/single-word-only/*` — active single-word runtime bundle
-
-To refresh those assets from a compatible source workspace:
+Generate a starter single-word config:
 
 ```bash
-pnpm install
-pnpm run sync:wasm
-pnpm run sync:runtime-assets
-pnpm run build
+npx @workspaces-team/waker-config --keyword "Operator"
 ```
 
-Set `WAKER_SOURCE_REPO` to the absolute path of that source workspace before running the sync
-commands.
+Write to a custom path:
 
-The exact source-of-truth copy contract is documented in:
+```bash
+npx @workspaces-team/waker-config --keyword "Operator" --out ./config/waker-head.config.json
+```
 
-- [runtime-assets.manifest.json](./runtime-assets.manifest.json)
+Print the generated config to stdout:
 
-Only the `single_word_only` runtime is bundled in the publishable package right now.
+```bash
+npx @workspaces-team/waker-config --keyword "Operator" --stdout
+```
 
-The publishable package intentionally vendors only the browser assets it actually needs:
+## What You Get
 
-- `runtime/wasm/waker_wasm.js`
-- `runtime/wasm/waker_wasm_bg.wasm`
-- `runtime/single-word-only/backbone/model.bin`
-- `runtime/single-word-only/backbone/model_manifest.json`
-- `runtime/single-word-only/runtime-config.json`
-- `runtime/single-word-only/registration.json`
-- `runtime/single-word-only/registration/<keyword>/detector.json`
-
-Those files should be treated as a unit. If you host them yourself, keep their relative paths
-intact.
+- single-word tiny-head config and policy types
+- browser/WASM-backed tiny-head trainer
+- serialized head artifact helpers
+- runtime path helpers for the bundled browser assets
 
 ## Use
 
@@ -121,7 +82,7 @@ const artifact = trainer.trainFromClips(
 const json = serializeWakerHeadArtifact(artifact);
 ```
 
-You can also start from the generated config file:
+Use a generated config file directly:
 
 ```ts
 import config from "./waker-head.config.json";
@@ -133,9 +94,7 @@ await trainer.load({ basePath: "/waker-config/" });
 const artifact = trainer.trainFromClips(examples, config);
 ```
 
-## Vite integration
-
-If you want the package to serve its vendored runtime assets directly inside a Vite app:
+## Vite Integration
 
 ```ts
 import { defineConfig } from "vite";
@@ -146,16 +105,13 @@ export default defineConfig({
 });
 ```
 
-The plugin serves and copies the package runtime at:
+The default runtime mount base is:
 
 ```text
 /waker-config/
 ```
 
-That base path matters. If you override `mountBase`, use the same base path when loading the
-trainer.
-
-Then in the client:
+If you override `mountBase`, pass the same base path when loading the trainer:
 
 ```ts
 import { createWakerWebHeadTrainer } from "@workspaces-team/waker-config";
@@ -167,38 +123,58 @@ await trainer.load({
 });
 ```
 
-## Static asset considerations
+## Runtime Assets
 
-These are the deployment concerns this package expects:
+This package is intended to be publishable and self-contained. It depends on:
+
+- `runtime/wasm/*` for the generated browser detector runtime
+- `runtime/single-word-only/*` for the tracked active single-word bundle
+
+Preview the published package:
+
+```bash
+npm pack --dry-run
+```
+
+The `prepack` hook builds `runtime/wasm/*` from the mirrored `rust/sdk-wasm/` source tree at pack
+time.
+
+Refresh the tracked runtime bundle:
+
+```bash
+pnpm install
+pnpm run sync:sdk-wasm:source
+pnpm run sync:runtime-assets
+```
+
+Source-of-truth asset manifest:
+
+- [runtime-assets.manifest.json](https://github.com/workspaces-team/waker/blob/main/packages/waker-config/runtime-assets.manifest.json)
+
+Only the `single_word_only` runtime bundle is tracked in git.
+
+## Deployment Notes
 
 - Serve the JS wrapper and `.wasm` binary from stable static URLs.
-- Keep `registration.json`, `runtime-config.json`, `backbone/model.bin`, and
-  `backbone/model_manifest.json` together under the same runtime base.
-- Use the Vite plugin if possible so content types and copy behavior stay correct.
+- Keep `registration.json`, `runtime-config.json`, `backbone/model.bin`, and `backbone/model_manifest.json` together under the same runtime base.
+- Use the Vite plugin when possible so dev and build output keep the same asset layout.
 - If you serve the assets yourself, ensure `.wasm` is served with `application/wasm`.
-- The dev plugin sets `Cross-Origin-Opener-Policy: same-origin` and
-  `Cross-Origin-Embedder-Policy: require-corp`; preserve equivalent headers in deployments where
-  your app depends on cross-origin isolation.
-- The bundled runtime is single-word-only right now. Do not assume other policy directories are
-  present.
+- Preserve cross-origin isolation headers where your app depends on them.
+- Do not assume any policy directory other than `single_word_only`.
 
-## What belongs here
+## Scope
 
-- Tiny-head training and artifact generation
-- Tiny-head config and policy typing
-- Shared browser runtime/backbone asset resolution used by training
-- Runtime asset mounting for browser-side training
+Belongs here:
 
-## What does not
+- single-word training and artifact generation
+- config generation and policy typing
+- browser runtime/backbone asset resolution used by training
+- runtime asset mounting for browser-side training
 
-- Live wake-word detection
-- Custom detector loading / runtime scoring
-- Vite/browser asset mounting
+Does not belong here:
 
-For those, use [`@workspaces-team/waker-web`](../waker-web/README.md).
+- live wake detection
+- custom detector scoring at runtime
+- browser-side inference APIs
 
-## Open model note
-
-The Waker tiny backbone and its weights are intended to be fully open and open-weight soon. This
-package is structured so that transition can happen cleanly when the backing model artifacts are
-ready to publish.
+Use `@workspaces-team/waker-web` for detection.

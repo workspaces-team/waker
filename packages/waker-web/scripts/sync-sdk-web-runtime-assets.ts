@@ -45,13 +45,55 @@ type RuntimeConfigPayload = {
 };
 
 const packageRoot = resolve(import.meta.dirname, "..");
-const repoRoot = resolve(packageRoot, process.env.WAKER_SOURCE_REPO ?? "../../../waker");
+const deliverableSourceCandidates = [
+  process.env.WAKER_SOURCE_REPO ? resolve(process.env.WAKER_SOURCE_REPO) : null,
+  resolve(packageRoot, "../../../../"),
+  resolve(packageRoot, "../../../waker"),
+].filter((value): value is string => Boolean(value));
+const repoRoot = deliverableSourceCandidates.find((candidateRoot) =>
+  existsSync(resolve(candidateRoot, "data/academy/deliverables")),
+);
 const sdkRuntimeRoot = resolve(packageRoot, "runtime");
 const runtimeAssetsManifest = readJsonFile<RuntimeAssetsManifest>(
   resolve(packageRoot, "runtime-assets.manifest.json"),
 );
-const wasmBackboneWeightsPath = resolve(repoRoot, runtimeAssetsManifest.compatibilityBackbone.weightsBinary);
-const wasmBackboneManifestPath = resolve(repoRoot, runtimeAssetsManifest.compatibilityBackbone.manifestJson);
+const backboneSourceCandidates = [
+  resolve(packageRoot, "../.."),
+  process.env.WAKER_SOURCE_REPO ? resolve(process.env.WAKER_SOURCE_REPO) : null,
+  resolve(packageRoot, "../../../../"),
+  resolve(packageRoot, "../../../waker"),
+].filter((value): value is string => Boolean(value));
+
+function resolveBackboneSourcePath(relativePath: string): string {
+  for (const candidateRoot of backboneSourceCandidates) {
+    const directPath = resolve(candidateRoot, relativePath);
+    if (existsSync(directPath)) {
+      return directPath;
+    }
+
+    if (relativePath.startsWith("rust/sdk-wasm/")) {
+      const privateFallbackPath = resolve(
+        candidateRoot,
+        "lib/extensions/sdk-wasm",
+        relativePath.slice("rust/sdk-wasm/".length),
+      );
+      if (existsSync(privateFallbackPath)) {
+        return privateFallbackPath;
+      }
+    }
+  }
+
+  throw new Error(
+    `Could not resolve backbone source path for ${relativePath}. Checked roots: ${backboneSourceCandidates.join(", ")}`,
+  );
+}
+
+const wasmBackboneWeightsPath = resolveBackboneSourcePath(
+  runtimeAssetsManifest.compatibilityBackbone.weightsBinary,
+);
+const wasmBackboneManifestPath = resolveBackboneSourcePath(
+  runtimeAssetsManifest.compatibilityBackbone.manifestJson,
+);
 
 function readJsonFile<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, "utf8")) as T;
@@ -62,6 +104,9 @@ function writeJsonFile(filePath: string, payload: unknown) {
 }
 
 function latestBundleRootWithRegistration(cohortId: string): string | null {
+  if (!repoRoot) {
+    return null;
+  }
   const currentRoot = resolve(
     repoRoot,
     "data/academy/deliverables",
@@ -248,7 +293,7 @@ for (const config of runtimeAssetsManifest.policies) {
 
 for (const entry of readdirSync(sdkRuntimeRoot, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
-  if (entry.name === "wasm" || entry.name === "vad") continue;
+  if (entry.name === "wasm") continue;
   if (runtimeAssetsManifest.policies.some((policy) => policy.runtimeDir === entry.name)) continue;
   rmSync(resolve(sdkRuntimeRoot, entry.name), { recursive: true, force: true });
 }

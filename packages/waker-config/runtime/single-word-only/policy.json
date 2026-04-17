@@ -37,10 +37,6 @@
         "top2"
       ],
       "routingConfusables": [
-        "hey operator",
-        "hi operator",
-        "hello operator",
-        "say operator",
         "navigator",
         "terminator"
       ],
@@ -67,9 +63,6 @@
         "top2"
       ],
       "routingConfusables": [
-        "hey navigator",
-        "hi navigator",
-        "hello navigator",
         "operator",
         "alligator",
         "terminator",
@@ -98,10 +91,6 @@
         "top2"
       ],
       "routingConfusables": [
-        "hey siri",
-        "hi siri",
-        "hello siri",
-        "say siri",
         "sirius",
         "serena"
       ],
@@ -127,10 +116,6 @@
         "top2"
       ],
       "routingConfusables": [
-        "hey nova",
-        "hi nova",
-        "hello nova",
-        "say nova",
         "mona",
         "nora"
       ],
@@ -156,10 +141,6 @@
         "top2"
       ],
       "routingConfusables": [
-        "hey odyssey",
-        "hi odyssey",
-        "hello odyssey",
-        "say odyssey",
         "ornament",
         "opal"
       ],

@@ -1,8 +1,8 @@
 {
   "name": "@workspaces-team/waker-config",
-  "version": "0.0.0-alpha.1",
+  "version": "0.1.0-alpha.0",
   "type": "module",
-  "description": "Browser-side tiny-head config, artifact, and training utilities for Waker.",
+  "description": "Single-word browser wake-word training and config utilities for Waker.",
   "license": "MIT",
   "homepage": "https://waker.live",
   "bugs": {
@@ -15,9 +15,14 @@
   },
   "keywords": [
     "wake-word",
+    "wakeword",
+    "single-word",
+    "keyword-spotting",
     "browser",
-    "wasm",
+    "webassembly",
     "audio",
+    "speech",
+    "on-device",
     "tiny-head",
     "vite"
   ],
@@ -69,6 +74,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepack": "cd ../.. && corepack pnpm run sdk-wasm:build:release && corepack pnpm --filter @workspaces-team/waker-config run sync:wasm && corepack pnpm --filter @workspaces-team/waker-config run build",
     "build": "rm -rf ./dist && bun build ./src/index.ts ./src/head-trainer.ts ./src/config-template.ts ./src/cli.ts ./src/runtime-common.ts ./src/types.ts ./src/vite.ts --outdir ./dist --format esm && chmod +x ./dist/cli.js && tsc -p tsconfig.json --emitDeclarationOnly --declaration --declarationMap false",
     "sync:runtime-assets": "bun ./scripts/sync-runtime-assets.ts",
     "sync:wasm": "bun ./scripts/sync-wasm.ts",

@@ -286,10 +286,6 @@
       "single-nasal-onset-scale2"
     ],
     "hardNegativePhrases": [
-      "hey operator",
-      "hi operator",
-      "hello operator",
-      "say operator",
       "navigator",
       "terminator"
     ],

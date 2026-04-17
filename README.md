@@ -1,112 +1,187 @@
-# waker
+<p align="center">
+  <img src="./docs/assets/landing-cards.png" alt="Waker highlights: local training, fast runtime, portable bundles" width="980" />
+</p>
 
-Public pnpm workspace monorepo for the browser-side Waker packages.
+<h1 align="center">waker</h1>
 
-> Active development, very early release.
->
-> If you run into a problem, please open an issue. We are actively validating and verifying this
-> release and expect some rough edges while the public package surface settles.
+<p align="center">
+  Single-word browser wake detection for the Waker web stack.
+</p>
+
+<p align="center">
+  <a href="https://github.com/workspaces-team/waker/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/workspaces-team/waker/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/workspaces-team/waker/actions/workflows/version-policy.yml"><img alt="Version Policy" src="https://github.com/workspaces-team/waker/actions/workflows/version-policy.yml/badge.svg"></a>
+</p>
+
+<p align="center">
+  <code>@workspaces-team/waker-config</code> for local browser training.
+  <code>@workspaces-team/waker-vad</code> for standalone VAD assets.
+  <code>@workspaces-team/waker-web</code> for fast on-device detection.
+</p>
+
+This public mirror is intentionally narrow. It exists to publish and maintain the browser-facing
+single-word wake packages, plus the mirrored Rust runtimes they need.
 
 Website: `https://waker.live`  
 Issues: `https://github.com/workspaces-team/waker/issues`
 
-This repo groups two publishable npm packages under the `@workspaces-team` organization:
+## Why This Repo Exists
 
-- `@workspaces-team/waker-config`
-- `@workspaces-team/waker-web`
+- train and tune a single-word wake target in the browser
+- run a compact WASM-backed detector close to the user interface
+- publish portable runtime bundles the product can own and evolve
 
-Both packages are intentionally versioned as very early alpha packages while we validate the
-public release shape.
+## Packages
 
-## Workspace layout
+| Package | Purpose | Install |
+| --- | --- | --- |
+| [`@workspaces-team/waker-config`](https://www.npmjs.com/package/@workspaces-team/waker-config) | Train and serialize single-word tiny heads in the browser | `npm install @workspaces-team/waker-config` |
+| [`@workspaces-team/waker-vad`](https://www.npmjs.com/package/@workspaces-team/waker-vad) | Ship standalone browser VAD runtime assets | `npm install @workspaces-team/waker-vad` |
+| [`@workspaces-team/waker-web`](https://www.npmjs.com/package/@workspaces-team/waker-web) | Run single-word wake detection in the browser | `npm install @workspaces-team/waker-web` |
 
-```text
-packages/
-  waker-config/
-  waker-web/
-```
-
-## What each package does
-
-### `@workspaces-team/waker-config`
-
-Owns browser-side tiny-head config, artifact, and training utilities:
-
-- tiny-head config/types
-- browser/WASM-backed tiny-head trainer
-- head artifact serialization
-- trainer-side bundled runtime helpers
-
-### `@workspaces-team/waker-web`
-
-Owns browser-side wake-word detection:
-
-- bundled detector runtime
-- custom trained-head loading
-- Vite runtime asset plugin
-- vendored runtime assets for the active single-word policies
-
-## Install
+## Quick Start
 
 ```bash
 pnpm install
-pnpm run build
+pnpm run verify
 ```
 
-## npm packages
-
-### `@workspaces-team/waker-config`
-
-Browser-side tiny-head training and artifact generation.
+Generate a starter single-word registration config:
 
 ```bash
 npx @workspaces-team/waker-config --keyword "Operator"
 ```
 
-See [`packages/waker-config/README.md`](./packages/waker-config/README.md) for full usage and Vite
-integration.
+Load the bundled single-word detector runtime:
+
+```ts
+import {
+  createWakerWebDetector,
+  getBundledWakerRegistrationUrl,
+} from "@workspaces-team/waker-web";
+
+const detector = createWakerWebDetector();
+await detector.load(getBundledWakerRegistrationUrl("single_word_only"));
+```
+
+## Package Flows
+
+### `@workspaces-team/waker-config`
+
+```mermaid
+flowchart LR
+  A[Single-word clips] --> B[Browser trainer]
+  B --> C[Tiny-head artifact]
+  C --> D[Runtime config + detector JSON]
+```
 
 ### `@workspaces-team/waker-web`
 
-Browser-side wake-word detection runtime.
-
-```bash
-npm install @workspaces-team/waker-web
+```mermaid
+flowchart LR
+  A[Mu-Law audio chunks] --> B[WASM detector runtime]
+  B --> C[Single-word wake decision]
 ```
 
-See [`packages/waker-web/README.md`](./packages/waker-web/README.md) for runtime loading and Vite
-integration.
+### `@workspaces-team/waker-vad`
 
-## Refresh vendored assets
+```mermaid
+flowchart LR
+  A[16 kHz audio] --> B[Silero VAD weights]
+  B --> C[VAD WASM runtime]
+  C --> D[Speech activity signal]
+```
 
-Both packages vendor browser runtime assets from a compatible source workspace.
+## What Lives Here
 
-Set `WAKER_SOURCE_REPO` to the absolute path of that source workspace before running the sync
-commands.
+### `@workspaces-team/waker-config`
 
-Then run:
+The training and artifact side of the browser stack:
+
+- single-word tiny-head config generation
+- browser/WASM-backed head training
+- head artifact serialization
+- trainer-side runtime helpers
+
+Docs: <https://github.com/workspaces-team/waker/tree/main/packages/waker-config#readme>
+
+### `@workspaces-team/waker-vad`
+
+The standalone VAD asset package:
+
+- mirrored Silero VAD WASM runtime
+- mirrored VAD weight bundle
+- Vite runtime asset plugin
+
+Docs: <https://github.com/workspaces-team/waker/tree/main/packages/waker-vad#readme>
+
+### `@workspaces-team/waker-web`
+
+The detector side of the browser stack:
+
+- bundled single-word detector runtime
+- custom trained-head loading
+- Vite runtime asset plugin
+- vendored runtime assets for the active single-word surface
+
+Docs: <https://github.com/workspaces-team/waker/tree/main/packages/waker-web#readme>
+
+### `rust/sdk-wasm`
+
+Mirrored Rust source for the detector WASM runtime and backbone weight bundle used by the public
+browser packages. `pkg/` is generated locally and not committed.
+
+### `rust/vad-wasm`
+
+Mirrored Rust source for the Silero VAD WASM runtime used by `@workspaces-team/waker-vad`. `pkg/`
+is generated locally and not committed.
+
+## Workspace Layout
+
+```text
+packages/
+  waker-config/
+  waker-vad/
+  waker-web/
+rust/
+  sdk-wasm/
+  vad-wasm/
+```
+
+## Maintainer Flow
+
+Refresh mirrored sources and runtime manifests:
 
 ```bash
-pnpm run waker-config:sync:wasm
+pnpm run sync:sdk-wasm:source
+pnpm run sync:vad-wasm:source
 pnpm run waker-config:sync:runtime-assets
-pnpm run waker-web:sync:wasm
+pnpm run waker-vad:sync:runtime
 pnpm run waker-web:sync:runtime-assets
-pnpm run waker-web:sync:vad-wasm
 ```
 
-## Open-source posture
+Build the mirrored Rust runtimes locally:
 
-This repo is organized to be healthy for open-source publication:
+```bash
+pnpm run sdk-wasm:build:release
+pnpm run vad-wasm:build:release
+```
 
-- clear package boundaries
-- explicit vendored runtime assets
-- source-of-truth copy manifests
-- standalone package metadata and release docs
+Run the local repo gates:
 
-See also:
+```bash
+pnpm run verify
+pnpm run version:check:pr -- --base-ref origin/main
+```
+
+## Design Constraints
+
+- The public scope is single-word wake detection only.
+- The browser packages are first-class and publishable on their own.
+- The Rust runtimes are mirrored so release builds can stay mechanical.
+- GitHub Actions enforce CI and pull-request version policy.
+
+More repo docs:
 
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 - [`RELEASING.md`](./RELEASING.md)
-
-The Waker tiny backbone model and weights are also intended to become fully open and open-weight
-soon, so these packages are structured to absorb that transition cleanly.

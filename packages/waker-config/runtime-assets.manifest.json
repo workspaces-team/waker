@@ -8,8 +8,8 @@
     }
   ],
   "compatibilityBackbone": {
-    "weightsBinary": "lib/extensions/sdk-wasm/model/backbone_16k.bin",
-    "manifestJson": "lib/extensions/sdk-wasm/model/backbone_16k_manifest.json",
+    "weightsBinary": "rust/sdk-wasm/model/backbone_16k.bin",
+    "manifestJson": "rust/sdk-wasm/model/backbone_16k_manifest.json",
     "destinationModelPath": "backbone/model.bin",
     "destinationManifestPath": "backbone/model_manifest.json"
   },

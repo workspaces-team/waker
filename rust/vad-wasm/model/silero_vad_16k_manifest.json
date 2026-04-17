@@ -1,0 +1,121 @@
+{
+  "stft_basis": {
+    "shape": [
+      258,
+      1,
+      256
+    ],
+    "offset": 0,
+    "size": 66048
+  },
+  "enc0_w": {
+    "shape": [
+      128,
+      129,
+      3
+    ],
+    "offset": 264192,
+    "size": 49536
+  },
+  "enc0_b": {
+    "shape": [
+      128
+    ],
+    "offset": 462336,
+    "size": 128
+  },
+  "enc1_w": {
+    "shape": [
+      64,
+      128,
+      3
+    ],
+    "offset": 462848,
+    "size": 24576
+  },
+  "enc1_b": {
+    "shape": [
+      64
+    ],
+    "offset": 561152,
+    "size": 64
+  },
+  "enc2_w": {
+    "shape": [
+      64,
+      64,
+      3
+    ],
+    "offset": 561408,
+    "size": 12288
+  },
+  "enc2_b": {
+    "shape": [
+      64
+    ],
+    "offset": 610560,
+    "size": 64
+  },
+  "enc3_w": {
+    "shape": [
+      128,
+      64,
+      3
+    ],
+    "offset": 610816,
+    "size": 24576
+  },
+  "enc3_b": {
+    "shape": [
+      128
+    ],
+    "offset": 709120,
+    "size": 128
+  },
+  "lstm_w_ih": {
+    "shape": [
+      512,
+      128
+    ],
+    "offset": 709632,
+    "size": 65536
+  },
+  "lstm_w_hh": {
+    "shape": [
+      512,
+      128
+    ],
+    "offset": 971776,
+    "size": 65536
+  },
+  "lstm_b_ih": {
+    "shape": [
+      512
+    ],
+    "offset": 1233920,
+    "size": 512
+  },
+  "lstm_b_hh": {
+    "shape": [
+      512
+    ],
+    "offset": 1235968,
+    "size": 512
+  },
+  "dec_w": {
+    "shape": [
+      1,
+      128,
+      1
+    ],
+    "offset": 1238016,
+    "size": 128
+  },
+  "dec_b": {
+    "shape": [
+      1
+    ],
+    "offset": 1238528,
+    "size": 1
+  }
+}

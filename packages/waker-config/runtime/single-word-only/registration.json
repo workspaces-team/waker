@@ -8,12 +8,7 @@
   "acceptedWakeForms": [
     "operator"
   ],
-  "siblingNegativeForms": [
-    "hey operator",
-    "hi operator",
-    "hello operator",
-    "say operator"
-  ],
+  "siblingNegativeForms": [],
   "structuralConfusables": [
     "navigator",
     "terminator"
@@ -49,7 +44,6 @@
   "detectorConfigPath": "registration/operator/detector.json",
   "policyPath": "policy.json",
   "bundleManifestPath": "bundle.manifest.json",
-  "sourceRegistrationPath": "registration/operator/source-registration.json",
   "sourceTraining": {
     "strategyUsed": "top2",
     "validationAccuracy": 1,

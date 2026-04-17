@@ -15,13 +15,23 @@ stabilizing rather than final.
 
 ```bash
 pnpm install
-pnpm run build
-pnpm run typecheck
+pnpm run sdk-wasm:build:release
+pnpm run vad-wasm:build:release
+pnpm run verify
 ```
 
-## Asset refresh flow
+If your branch changes publishable files under `packages/waker-config/`, `packages/waker-vad/`, `packages/waker-web/`, or
+the mirrored `rust/sdk-wasm/` / `rust/vad-wasm/` inputs for those packages, bump the affected
+package version before merge:
 
-The published packages vendor browser runtime assets from a compatible source workspace.
+```bash
+pnpm run version:packages -- --package=all --bump=patch
+pnpm run version:check:pr -- --base-ref origin/main
+```
+
+## Source Sync Flow
+
+Tracked runtime manifests and mirrored Rust source sync from a compatible source workspace.
 
 Set `WAKER_SOURCE_REPO` to the absolute path of that source workspace before running the sync
 commands.
@@ -29,13 +39,16 @@ commands.
 Then refresh:
 
 ```bash
-pnpm run waker-config:sync:wasm
+pnpm run sync:sdk-wasm:source
+pnpm run sync:vad-wasm:source
 pnpm run waker-config:sync:runtime-assets
-pnpm run waker-web:sync:wasm
+pnpm run waker-vad:sync:runtime
 pnpm run waker-web:sync:runtime-assets
-pnpm run waker-web:sync:vad-wasm
-pnpm run build
 ```
+
+The generated payload under `packages/waker-config/runtime/wasm/`,
+`packages/waker-web/runtime/wasm/`, and `packages/waker-vad/runtime/vad/` is built from mirrored
+Rust source during package prepack and is not tracked in git.
 
 ## Reporting issues
 

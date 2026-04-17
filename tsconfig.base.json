@@ -13,6 +13,8 @@
     "paths": {
       "@workspaces-team/waker-config": ["packages/waker-config/src/index.ts"],
       "@workspaces-team/waker-config/*": ["packages/waker-config/src/*"],
+      "@workspaces-team/waker-vad": ["packages/waker-vad/src/index.ts"],
+      "@workspaces-team/waker-vad/*": ["packages/waker-vad/src/*"],
       "@workspaces-team/waker-web": ["packages/waker-web/src/index.ts"],
       "@workspaces-team/waker-web/*": ["packages/waker-web/src/*"]
     }

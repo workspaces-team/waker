@@ -41,13 +41,55 @@ type RuntimeConfigPayload = {
 };
 
 const packageRoot = resolve(import.meta.dirname, "..");
-const repoRoot = resolve(packageRoot, process.env.WAKER_SOURCE_REPO ?? "../../../waker");
+const deliverableSourceCandidates = [
+  process.env.WAKER_SOURCE_REPO ? resolve(process.env.WAKER_SOURCE_REPO) : null,
+  resolve(packageRoot, "../../../../"),
+  resolve(packageRoot, "../../../waker"),
+].filter((value): value is string => Boolean(value));
+const repoRoot = deliverableSourceCandidates.find((candidateRoot) =>
+  existsSync(resolve(candidateRoot, "data/academy/deliverables")),
+);
 const runtimeRoot = resolve(packageRoot, "runtime");
 const runtimeAssetsManifest = JSON.parse(
   readFileSync(resolve(packageRoot, "runtime-assets.manifest.json"), "utf8"),
 ) as RuntimeAssetsManifest;
-const wasmBackboneWeightsPath = resolve(repoRoot, runtimeAssetsManifest.compatibilityBackbone.weightsBinary);
-const wasmBackboneManifestPath = resolve(repoRoot, runtimeAssetsManifest.compatibilityBackbone.manifestJson);
+const backboneSourceCandidates = [
+  resolve(packageRoot, "../.."),
+  process.env.WAKER_SOURCE_REPO ? resolve(process.env.WAKER_SOURCE_REPO) : null,
+  resolve(packageRoot, "../../../../"),
+  resolve(packageRoot, "../../../waker"),
+].filter((value): value is string => Boolean(value));
+
+function resolveBackboneSourcePath(relativePath: string): string {
+  for (const candidateRoot of backboneSourceCandidates) {
+    const directPath = resolve(candidateRoot, relativePath);
+    if (existsSync(directPath)) {
+      return directPath;
+    }
+
+    if (relativePath.startsWith("rust/sdk-wasm/")) {
+      const privateFallbackPath = resolve(
+        candidateRoot,
+        "lib/extensions/sdk-wasm",
+        relativePath.slice("rust/sdk-wasm/".length),
+      );
+      if (existsSync(privateFallbackPath)) {
+        return privateFallbackPath;
+      }
+    }
+  }
+
+  throw new Error(
+    `Could not resolve backbone source path for ${relativePath}. Checked roots: ${backboneSourceCandidates.join(", ")}`,
+  );
+}
+
+const wasmBackboneWeightsPath = resolveBackboneSourcePath(
+  runtimeAssetsManifest.compatibilityBackbone.weightsBinary,
+);
+const wasmBackboneManifestPath = resolveBackboneSourcePath(
+  runtimeAssetsManifest.compatibilityBackbone.manifestJson,
+);
 
 function readJsonFile<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, "utf8")) as T;
@@ -58,6 +100,9 @@ function writeJsonFile(filePath: string, payload: unknown) {
 }
 
 function latestBundleRootWithRegistration(cohortId: string): string | null {
+  if (!repoRoot) {
+    return null;
+  }
   const currentRoot = resolve(repoRoot, "data/academy/deliverables", cohortId, "current");
   if (existsSync(resolve(currentRoot, "registration.json"))) {
     return currentRoot;

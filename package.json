@@ -18,14 +18,28 @@
   ],
   "scripts": {
     "build": "pnpm -r build",
+    "verify": "pnpm run typecheck && pnpm run build && pnpm run test",
+    "test": "pnpm run sdk-wasm:test && pnpm run vad-wasm:test",
     "typecheck": "pnpm -r typecheck",
-    "publish:waker-config": "pnpm --filter @workspaces-team/waker-config publish --access public --no-git-checks",
-    "publish:waker-web": "pnpm --filter @workspaces-team/waker-web publish --access public --no-git-checks",
-    "publish:npm": "pnpm run publish:waker-config && pnpm run publish:waker-web",
+    "auth:npm": "bun ./scripts/npm-auth.ts",
+    "version:check:pr": "bun ./scripts/check-pr-package-versions.ts",
+    "version:packages": "bun ./scripts/version-packages.ts",
+    "sync:sdk-wasm:source": "bun ./scripts/sync-rust-source.ts --source-extension=sdk-wasm --destination=rust/sdk-wasm",
+    "sync:vad-wasm:source": "bun ./scripts/sync-rust-source.ts --source-extension=vad-wasm --destination=rust/vad-wasm",
+    "sdk-wasm:build": "cd rust/sdk-wasm && wasm-pack build --target web --dev",
+    "sdk-wasm:build:release": "cd rust/sdk-wasm && wasm-pack build --target web --release",
+    "sdk-wasm:test": "cd rust/sdk-wasm && cargo test",
+    "vad-wasm:build": "cd rust/vad-wasm && wasm-pack build --target web --dev",
+    "vad-wasm:build:release": "cd rust/vad-wasm && wasm-pack build --target web --release",
+    "vad-wasm:test": "cd rust/vad-wasm && cargo test",
+    "publish:waker-config": "bun ./scripts/publish-package.ts --package=@workspaces-team/waker-config",
+    "publish:waker-vad": "bun ./scripts/publish-package.ts --package=@workspaces-team/waker-vad",
+    "publish:waker-web": "bun ./scripts/publish-package.ts --package=@workspaces-team/waker-web",
+    "publish:npm": "pnpm run publish:waker-config && pnpm run publish:waker-vad && pnpm run publish:waker-web",
     "waker-config:sync:wasm": "pnpm --filter @workspaces-team/waker-config run sync:wasm",
     "waker-config:sync:runtime-assets": "pnpm --filter @workspaces-team/waker-config run sync:runtime-assets",
+    "waker-vad:sync:runtime": "pnpm --filter @workspaces-team/waker-vad run sync:runtime",
     "waker-web:sync:wasm": "pnpm --filter @workspaces-team/waker-web run sync:wasm",
-    "waker-web:sync:runtime-assets": "pnpm --filter @workspaces-team/waker-web run sync:runtime-assets",
-    "waker-web:sync:vad-wasm": "pnpm --filter @workspaces-team/waker-web run sync:vad-wasm"
+    "waker-web:sync:runtime-assets": "pnpm --filter @workspaces-team/waker-web run sync:runtime-assets"
   }
 }

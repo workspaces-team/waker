@@ -1,8 +1,8 @@
 {
   "name": "@workspaces-team/waker-web",
-  "version": "0.0.0-alpha.1",
+  "version": "0.1.0-alpha.0",
   "type": "module",
-  "description": "Browser-side wake-word detection runtime for Waker.",
+  "description": "Single-word browser wake-word detection runtime for Waker.",
   "license": "MIT",
   "homepage": "https://waker.live",
   "bugs": {
@@ -15,9 +15,14 @@
   },
   "keywords": [
     "wake-word",
+    "wakeword",
+    "single-word",
+    "keyword-spotting",
     "browser",
-    "wasm",
+    "webassembly",
     "audio",
+    "speech",
+    "on-device",
     "detection",
     "vite"
   ],
@@ -54,10 +59,10 @@
     "LICENSE"
   ],
   "scripts": {
+    "prepack": "cd ../.. && corepack pnpm run sdk-wasm:build:release && corepack pnpm --filter @workspaces-team/waker-web run sync:wasm && corepack pnpm --filter @workspaces-team/waker-web run build",
     "build": "rm -rf ./dist && bun build ./src/index.ts ./src/custom-detector.ts ./src/vite.ts ./src/runtime-common.ts ./src/types.ts --outdir ./dist --format esm && tsc -p tsconfig.json --emitDeclarationOnly --declaration --declarationMap false",
     "sync:runtime-assets": "bun ./scripts/sync-sdk-web-runtime-assets.ts",
     "sync:wasm": "bun ./scripts/sync-sdk-wasm.ts",
-    "sync:vad-wasm": "bun ./scripts/sync-sdk-vad-wasm.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

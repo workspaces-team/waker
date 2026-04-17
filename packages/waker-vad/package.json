@@ -1,0 +1,63 @@
+{
+  "name": "@workspaces-team/waker-vad",
+  "version": "0.1.0-alpha.0",
+  "type": "module",
+  "description": "Browser-side VAD runtime assets and Vite integration for Waker.",
+  "license": "MIT",
+  "homepage": "https://waker.live",
+  "bugs": {
+    "url": "https://github.com/workspaces-team/waker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/workspaces-team/waker.git",
+    "directory": "packages/waker-vad"
+  },
+  "keywords": [
+    "vad",
+    "voice-activity-detection",
+    "browser",
+    "webassembly",
+    "audio",
+    "speech",
+    "on-device",
+    "vite"
+  ],
+  "packageManager": "pnpm@10.33.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "runtime",
+    "README.md",
+    "CONTRIBUTING.md",
+    "RELEASING.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepack": "cd ../.. && corepack pnpm run vad-wasm:build:release && corepack pnpm --filter @workspaces-team/waker-vad run sync:runtime && corepack pnpm --filter @workspaces-team/waker-vad run build",
+    "build": "rm -rf ./dist && bun build ./src/index.ts ./src/vite.ts --outdir ./dist --format esm && tsc -p tsconfig.json --emitDeclarationOnly --declaration --declarationMap false",
+    "sync:runtime": "bun ./scripts/sync-vad-runtime.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
+  }
+}
