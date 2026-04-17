@@ -27,7 +27,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "bin": {
-    "waker-config": "./dist/cli.js"
+    "waker-config": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
