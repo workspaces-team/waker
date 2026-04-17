@@ -14,6 +14,12 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@workspaces-team/waker-config"><img alt="npm: waker-config" src="https://img.shields.io/npm/v/%40workspaces-team%2Fwaker-config?label=waker-config&color=0f766e"></a>
+  <a href="https://www.npmjs.com/package/@workspaces-team/waker-vad"><img alt="npm: waker-vad" src="https://img.shields.io/npm/v/%40workspaces-team%2Fwaker-vad?label=waker-vad&color=0b6aa2"></a>
+  <a href="https://www.npmjs.com/package/@workspaces-team/waker-web"><img alt="npm: waker-web" src="https://img.shields.io/npm/v/%40workspaces-team%2Fwaker-web?label=waker-web&color=7c3aed"></a>
+</p>
+
+<p align="center">
   <code>@workspaces-team/waker-config</code> for local browser training.
   <code>@workspaces-team/waker-vad</code> for standalone VAD assets.
   <code>@workspaces-team/waker-web</code> for fast on-device detection.

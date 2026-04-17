@@ -11,7 +11,7 @@ type PackageRule = {
 
 type PackageResult = {
   affectedFiles: string[];
-  baseVersion: string;
+  baseVersion: string | null;
   headVersion: string;
   name: string;
   versionChanged: boolean;
@@ -81,12 +81,32 @@ function readVersionFromFile(manifestPath: string): string {
   return manifest.version;
 }
 
-function readVersionFromRef(ref: string, manifestPath: string): string {
-  const manifest = JSON.parse(runGit(["show", `${ref}:${manifestPath}`])) as { version?: string };
-  if (!manifest.version) {
-    throw new Error(`Missing version in ${ref}:${manifestPath}`);
+function readVersionFromRef(ref: string, manifestPath: string): string | null {
+  try {
+    const manifest = JSON.parse(runGit(["show", `${ref}:${manifestPath}`])) as { version?: string };
+    if (!manifest.version) {
+      throw new Error(`Missing version in ${ref}:${manifestPath}`);
+    }
+    return manifest.version;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes(`exists on disk, but not in '${ref}'`) || message.includes(`path '${manifestPath}' does not exist in '${ref}'`)) {
+      return null;
+    }
+    throw error;
   }
-  return manifest.version;
+}
+
+function renderBaseVersion(baseVersion: string | null): string {
+  return baseVersion ?? "<new package>";
+}
+
+function didVersionChange(baseVersion: string | null, headVersion: string): boolean {
+  if (baseVersion === null) {
+    return true;
+  }
+
+  return baseVersion !== headVersion;
 }
 
 function isPackageAffectingFile(filePath: string, rule: PackageRule): boolean {
@@ -111,7 +131,7 @@ function printFailure(baseRef: string, failures: PackageResult[]) {
 
   for (const failure of failures) {
     console.error(`${failure.name}: version did not change (${failure.headVersion})`);
-    console.error(`base version: ${failure.baseVersion}`);
+    console.error(`base version: ${renderBaseVersion(failure.baseVersion)}`);
     console.error("changed files:");
     for (const filePath of failure.affectedFiles) {
       console.error(`- ${filePath}`);
@@ -156,7 +176,7 @@ const results: PackageResult[] = PACKAGE_RULES.map((rule) => {
     baseVersion,
     headVersion,
     name: rule.name,
-    versionChanged: baseVersion !== headVersion,
+    versionChanged: didVersionChange(baseVersion, headVersion),
   };
 });
 
@@ -174,5 +194,5 @@ if (affectedPackages.length === 0) {
 
 console.log(`Package version policy passed against ${baseRef}.`);
 for (const result of affectedPackages) {
-  console.log(`${result.name}: ${result.baseVersion} -> ${result.headVersion}`);
+  console.log(`${result.name}: ${renderBaseVersion(result.baseVersion)} -> ${result.headVersion}`);
 }
