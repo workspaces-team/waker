@@ -33,7 +33,7 @@ Usage:
   npx @workspaces-team/waker-config init --keyword "Operator" --out ./waker-head.config.json
 
 Options:
-  --keyword <value>                Required wake word or phrase.
+  --keyword <value>                Required single wake word.
   --out <path>                     Output path. Default: ${DEFAULT_OUT_PATH}
   --policy <policy>                Registration policy. Default: single_word_only
   --accepted-form <value>          Add an accepted wake form. Repeatable.
@@ -54,16 +54,11 @@ function expectValue(args: string[], flag: string, index: number): string {
 }
 
 function parsePolicy(value: string): WakerBundledRegistrationPolicy {
-  if (
-    value === "single_word_only" ||
-    value === "single_word_plus_prefix" ||
-    value === "exact_only" ||
-    value === "bare_plus_prefix"
-  ) {
+  if (value === "single_word_only") {
     return value;
   }
   throw new Error(
-    `Unsupported policy "${value}". Expected one of: single_word_only, single_word_plus_prefix, exact_only, bare_plus_prefix.`,
+    `Unsupported policy "${value}". Expected: single_word_only.`,
   );
 }
 

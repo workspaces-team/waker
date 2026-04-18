@@ -31,12 +31,7 @@ function policyForArtifact(
     return override;
   }
   const registrationPolicy = artifact.registration.registrationPolicy;
-  if (
-    registrationPolicy === "single_word_only" ||
-    registrationPolicy === "single_word_plus_prefix" ||
-    registrationPolicy === "exact_only" ||
-    registrationPolicy === "bare_plus_prefix"
-  ) {
+  if (registrationPolicy === "single_word_only") {
     return registrationPolicy;
   }
   return "single_word_only";

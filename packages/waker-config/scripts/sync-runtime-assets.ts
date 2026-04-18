@@ -11,7 +11,7 @@ import { dirname, resolve } from "node:path";
 
 type PolicyConfig = {
   cohortId: string;
-  policy: "single_word_only" | "single_word_plus_prefix";
+  policy: "single_word_only";
   runtimeDir: string;
 };
 

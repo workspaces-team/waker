@@ -1,8 +1,4 @@
-export type WakerBundledRegistrationPolicy =
-  | "bare_plus_prefix"
-  | "exact_only"
-  | "single_word_only"
-  | "single_word_plus_prefix";
+export type WakerBundledRegistrationPolicy = "single_word_only";
 
 export interface WakerWebDetectionResult {
   acceptedWakeForms: string[];

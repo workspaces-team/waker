@@ -21,21 +21,9 @@ function normalizeKeyword(keyword: string): string {
 
 function defaultAcceptedWakeForms(
   normalizedKeyword: string,
-  registrationPolicy: WakerBundledRegistrationPolicy,
+  _registrationPolicy: WakerBundledRegistrationPolicy,
 ): string[] {
-  switch (registrationPolicy) {
-    case "bare_plus_prefix":
-    case "single_word_plus_prefix": {
-      const prefixed = normalizedKeyword.startsWith("hey ")
-        ? normalizedKeyword
-        : `hey ${normalizedKeyword}`;
-      return prefixed === normalizedKeyword
-        ? [normalizedKeyword]
-        : [normalizedKeyword, prefixed];
-    }
-    default:
-      return [normalizedKeyword];
-  }
+  return [normalizedKeyword];
 }
 
 function defaultSiblingNegativeForms(normalizedKeyword: string): string[] {

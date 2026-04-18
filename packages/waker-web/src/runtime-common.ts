@@ -75,17 +75,10 @@ function normalizeRuntimeBasePath(basePath: string): string {
 }
 
 function bundledPolicyDirectory(policy: WakerBundledRegistrationPolicy): string {
-  switch (policy) {
-    case "single_word_only":
-      return "single-word-only";
-    case "single_word_plus_prefix":
-      return "single-word-plus-prefix";
-    case "exact_only":
-      return "exact-only";
-    case "bare_plus_prefix":
-    default:
-      return "bare-plus-prefix";
+  if (policy !== "single_word_only") {
+    throw new Error(`Unsupported bundled registration policy: ${policy}`);
   }
+  return "single-word-only";
 }
 
 export function getBundledWakerRuntimeBasePath(
