@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "cohortId": "2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1",
+  "surfaceId": "2026-04-16-surface-audio-official-first-run-single-word-registration-v1",
+  "releaseId": "2026-04-15-release-official-first-run-abstract-wake-v1",
+  "registrationPolicy": "single_word_only",
+  "routingRole": "diagnostic_only",
+  "decisionSurface": "head_assess",
+  "validationConfigPath": "academy/administration/validation/deliverable-single-word-registration.yaml",
+  "candidateAdapters": [
+    "single-ator-polysyllabic",
+    "single-open-vowel-polysyllabic-scale2",
+    "single-sibilant-bisyllabic",
+    "single-nasal-onset-scale2"
+  ],
+  "supportedWakeTargets": [
+    "operator",
+    "navigator",
+    "siri",
+    "nova",
+    "odyssey"
+  ],
+  "targetRows": [
+    {
+      "word": "operator",
+      "expectedAdapters": [
+        "single-ator-polysyllabic"
+      ],
+      "requiredAdapters": [
+        "single-ator-polysyllabic"
+      ],
+      "forbiddenAdapters": [
+        "single-nasal-onset-scale2"
+      ],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "routingConfusables": [
+        "navigator",
+        "terminator"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "ator_family"
+      ]
+    },
+    {
+      "word": "navigator",
+      "expectedAdapters": [
+        "single-nasal-onset-scale2",
+        "single-ator-polysyllabic"
+      ],
+      "requiredAdapters": [
+        "single-nasal-onset-scale2"
+      ],
+      "forbiddenAdapters": [],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "routingConfusables": [
+        "operator",
+        "alligator",
+        "terminator",
+        "generator",
+        "narrator"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "ator_family"
+      ]
+    },
+    {
+      "word": "siri",
+      "expectedAdapters": [
+        "single-sibilant-bisyllabic"
+      ],
+      "requiredAdapters": [
+        "single-sibilant-bisyllabic"
+      ],
+      "forbiddenAdapters": [],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "routingConfusables": [
+        "sirius",
+        "serena"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "sibilant"
+      ]
+    },
+    {
+      "word": "nova",
+      "expectedAdapters": [
+        "single-nasal-onset-scale2"
+      ],
+      "requiredAdapters": [
+        "single-nasal-onset-scale2"
+      ],
+      "forbiddenAdapters": [],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "routingConfusables": [
+        "mona",
+        "nora"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "nasal"
+      ]
+    },
+    {
+      "word": "odyssey",
+      "expectedAdapters": [
+        "single-open-vowel-polysyllabic-scale2"
+      ],
+      "requiredAdapters": [
+        "single-open-vowel-polysyllabic-scale2"
+      ],
+      "forbiddenAdapters": [],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "routingConfusables": [
+        "ornament",
+        "opal"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "open_vowel"
+      ]
+    }
+  ]
+}

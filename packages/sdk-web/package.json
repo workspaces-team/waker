@@ -1,0 +1,25 @@
+{
+  "name": "@waker/sdk-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Compatibility wrapper around @workspaces-team/waker-web and @workspaces-team/waker-config.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./custom-detector": "./src/custom-detector.ts",
+    "./head-trainer": "./src/head-trainer.ts",
+    "./vite": "./src/vite.ts"
+  },
+  "dependencies": {
+    "@workspaces-team/waker-config": "workspace:*",
+    "@workspaces-team/waker-web": "workspace:*"
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts ./src/head-trainer.ts ./src/custom-detector.ts ./src/vite.ts --outdir ./dist --format esm --external @workspaces-team/waker-config --external @workspaces-team/waker-config/* --external @workspaces-team/waker-web --external @workspaces-team/waker-web/*",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
+  }
+}

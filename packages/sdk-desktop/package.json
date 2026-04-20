@@ -1,0 +1,22 @@
+{
+  "name": "@waker/sdk-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Native desktop wake-word runtime package for Waker.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "bun build ./src/index.ts ./src/platform.ts --outdir ./dist --format esm --target node && node ./scripts/build-native.mjs --release",
+    "build:native": "node ./scripts/build-native.mjs --release",
+    "build:native:debug": "node ./scripts/build-native.mjs",
+    "prepare:native": "node ./scripts/prepare-native.mjs --release",
+    "test:native": "cargo test --manifest-path ./rust/Cargo.toml",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "typescript": "6.0.2"
+  }
+}

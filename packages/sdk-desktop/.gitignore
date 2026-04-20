@@ -1,0 +1,4 @@
+node_modules/
+dist/
+rust/target/
+native/*/waker-sdk-desktop.node

@@ -1,0 +1,304 @@
+{
+  "val_0": {
+    "shape": [
+      32,
+      128
+    ],
+    "offset": 0,
+    "size": 4096
+  },
+  "input_proj_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 16384,
+    "size": 128
+  },
+  "val_23": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 16896,
+    "size": 128
+  },
+  "val_25": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 17408,
+    "size": 128
+  },
+  "blocks_0_depthwise_weight": {
+    "shape": [
+      128,
+      1,
+      5
+    ],
+    "offset": 17920,
+    "size": 640
+  },
+  "blocks_0_depthwise_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 20480,
+    "size": 128
+  },
+  "blocks_0_pointwise_in_weight": {
+    "shape": [
+      256,
+      128,
+      1
+    ],
+    "offset": 20992,
+    "size": 32768
+  },
+  "blocks_0_pointwise_in_bias": {
+    "shape": [
+      256
+    ],
+    "offset": 152064,
+    "size": 256
+  },
+  "blocks_0_pointwise_out_weight": {
+    "shape": [
+      128,
+      256,
+      1
+    ],
+    "offset": 153088,
+    "size": 32768
+  },
+  "blocks_0_pointwise_out_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 284160,
+    "size": 128
+  },
+  "val_52": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 284672,
+    "size": 128
+  },
+  "val_54": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 285184,
+    "size": 128
+  },
+  "blocks_1_depthwise_weight": {
+    "shape": [
+      128,
+      1,
+      5
+    ],
+    "offset": 285696,
+    "size": 640
+  },
+  "blocks_1_depthwise_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 288256,
+    "size": 128
+  },
+  "blocks_1_pointwise_in_weight": {
+    "shape": [
+      256,
+      128,
+      1
+    ],
+    "offset": 288768,
+    "size": 32768
+  },
+  "blocks_1_pointwise_in_bias": {
+    "shape": [
+      256
+    ],
+    "offset": 419840,
+    "size": 256
+  },
+  "blocks_1_pointwise_out_weight": {
+    "shape": [
+      128,
+      256,
+      1
+    ],
+    "offset": 420864,
+    "size": 32768
+  },
+  "blocks_1_pointwise_out_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 551936,
+    "size": 128
+  },
+  "val_81": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 552448,
+    "size": 128
+  },
+  "val_83": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 552960,
+    "size": 128
+  },
+  "blocks_2_depthwise_weight": {
+    "shape": [
+      128,
+      1,
+      5
+    ],
+    "offset": 553472,
+    "size": 640
+  },
+  "blocks_2_depthwise_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 556032,
+    "size": 128
+  },
+  "blocks_2_pointwise_in_weight": {
+    "shape": [
+      256,
+      128,
+      1
+    ],
+    "offset": 556544,
+    "size": 32768
+  },
+  "blocks_2_pointwise_in_bias": {
+    "shape": [
+      256
+    ],
+    "offset": 687616,
+    "size": 256
+  },
+  "blocks_2_pointwise_out_weight": {
+    "shape": [
+      128,
+      256,
+      1
+    ],
+    "offset": 688640,
+    "size": 32768
+  },
+  "blocks_2_pointwise_out_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 819712,
+    "size": 128
+  },
+  "val_110": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 820224,
+    "size": 128
+  },
+  "val_112": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 820736,
+    "size": 128
+  },
+  "blocks_3_depthwise_weight": {
+    "shape": [
+      128,
+      1,
+      5
+    ],
+    "offset": 821248,
+    "size": 640
+  },
+  "blocks_3_depthwise_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 823808,
+    "size": 128
+  },
+  "blocks_3_pointwise_in_weight": {
+    "shape": [
+      256,
+      128,
+      1
+    ],
+    "offset": 824320,
+    "size": 32768
+  },
+  "blocks_3_pointwise_in_bias": {
+    "shape": [
+      256
+    ],
+    "offset": 955392,
+    "size": 256
+  },
+  "blocks_3_pointwise_out_weight": {
+    "shape": [
+      128,
+      256,
+      1
+    ],
+    "offset": 956416,
+    "size": 32768
+  },
+  "blocks_3_pointwise_out_bias": {
+    "shape": [
+      128
+    ],
+    "offset": 1087488,
+    "size": 128
+  },
+  "val_139": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 1088000,
+    "size": 128
+  },
+  "val_141": {
+    "shape": [
+      128,
+      1
+    ],
+    "offset": 1088512,
+    "size": 128
+  },
+  "val_782": {
+    "shape": [
+      128,
+      96
+    ],
+    "offset": 1089024,
+    "size": 12288
+  },
+  "output_proj_bias": {
+    "shape": [
+      96
+    ],
+    "offset": 1138176,
+    "size": 96
+  }
+}

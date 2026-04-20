@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "registrationId": "single-word-only-operator",
+  "requestedKeyword": "Operator",
+  "chosenWakeForm": "operator",
+  "normalizedWakeForm": "operator",
+  "registrationPolicy": "single_word_only",
+  "acceptedWakeForms": [
+    "operator"
+  ],
+  "siblingNegativeForms": [],
+  "structuralConfusables": [
+    "navigator",
+    "terminator"
+  ],
+  "routingHints": [
+    {
+      "wakeForm": "operator",
+      "expectedAdapters": [
+        "single-ator-polysyllabic"
+      ],
+      "requiredAdapters": [
+        "single-ator-polysyllabic"
+      ],
+      "forbiddenAdapters": [
+        "single-nasal-onset-scale2"
+      ],
+      "acceptableStrategies": [
+        "top1",
+        "top2"
+      ],
+      "sliceTags": [
+        "single_word_target"
+      ],
+      "conditionTags": [
+        "bare_registered",
+        "ator_family"
+      ]
+    }
+  ],
+  "runtimeConfigPath": "runtime-config.json",
+  "backbonePackageManifestPath": "backbone/model_manifest.json",
+  "backboneModelPath": "backbone/model.bin",
+  "detectorConfigPath": "registration/operator/detector.json",
+  "policyPath": "policy.json",
+  "bundleManifestPath": "bundle.manifest.json",
+  "sourceTraining": {
+    "strategyUsed": "top2",
+    "validationAccuracy": 1,
+    "threshold": 0.2,
+    "confirmationHits": 1,
+    "cooldownSeconds": 1
+  },
+  "sourceBundle": {
+    "runRoot": "data/academy/deliverables/2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1/runs/2026-04-16T22-03-55Z",
+    "currentRoot": "data/academy/deliverables/2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1/current"
+  }
+}
