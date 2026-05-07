@@ -47,6 +47,7 @@ export interface WakerHeadDetectorConfig {
   decisionPolicy?: {
     confirmationHits?: number;
     cooldownSeconds?: number;
+    duplicateSuppressionSeconds?: number;
     threshold?: number;
   };
   detectorFormat: string;
@@ -101,6 +102,7 @@ export interface WakerBrowserHeadTrainingConfig {
   acceptedWakeForms?: string[];
   confirmationHits?: number;
   cooldownSeconds?: number;
+  duplicateSuppressionSeconds?: number;
   detector?: {
     accelScale?: number;
     dilations?: number[];

@@ -49,7 +49,8 @@
     "validationAccuracy": 1,
     "threshold": 0.2,
     "confirmationHits": 1,
-    "cooldownSeconds": 1
+    "cooldownSeconds": 2,
+    "duplicateSuppressionSeconds": 4
   },
   "sourceBundle": {
     "runRoot": "data/academy/deliverables/2026-04-16-cohort-adapter-official-first-run-single-word-registration-v1/runs/2026-04-16T22-03-55Z",

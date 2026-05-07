@@ -59,6 +59,8 @@ struct BrowserHeadTrainingConfig {
     confirmation_hits: Option<u32>,
     #[serde(default)]
     cooldown_seconds: Option<f32>,
+    #[serde(default)]
+    duplicate_suppression_seconds: Option<f32>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -123,6 +125,7 @@ struct TrainingHyperParams {
     temperature: f32,
     confirmation_hits: u32,
     cooldown_seconds: f32,
+    duplicate_suppression_seconds: f32,
 }
 
 pub fn train_custom_head_artifact(
@@ -319,6 +322,7 @@ pub fn train_custom_head_artifact(
             threshold: selected_threshold,
             confirmation_hits: hyper.confirmation_hits,
             cooldown_seconds: hyper.cooldown_seconds,
+            duplicate_suppression_seconds: hyper.duplicate_suppression_seconds,
         }),
         head: HeadJsonConfig {
             hidden_width: hyper.hidden_width,
@@ -431,7 +435,8 @@ fn normalize_hyper_params(config: &BrowserHeadTrainingConfig) -> TrainingHyperPa
             .unwrap_or_else(default_threshold_grid),
         temperature: config.temperature.unwrap_or(1.0).max(1e-3),
         confirmation_hits: config.confirmation_hits.unwrap_or(1).max(1),
-        cooldown_seconds: config.cooldown_seconds.unwrap_or(1.0).max(0.0),
+        cooldown_seconds: config.cooldown_seconds.unwrap_or(2.0).max(0.0),
+        duplicate_suppression_seconds: config.duplicate_suppression_seconds.unwrap_or(4.0).max(0.0),
     }
 }
 

@@ -36,6 +36,8 @@ pub struct DecisionPolicy {
     pub confirmation_hits: u32,
     #[serde(default = "default_cooldown_seconds")]
     pub cooldown_seconds: f32,
+    #[serde(default = "default_duplicate_suppression_seconds")]
+    pub duplicate_suppression_seconds: f32,
 }
 
 fn default_threshold() -> f32 {
@@ -45,7 +47,10 @@ fn default_confirmation_hits() -> u32 {
     1
 }
 fn default_cooldown_seconds() -> f32 {
-    1.0
+    2.0
+}
+fn default_duplicate_suppression_seconds() -> f32 {
+    4.0
 }
 
 impl Default for DecisionPolicy {
@@ -54,6 +59,7 @@ impl Default for DecisionPolicy {
             threshold: default_threshold(),
             confirmation_hits: default_confirmation_hits(),
             cooldown_seconds: default_cooldown_seconds(),
+            duplicate_suppression_seconds: default_duplicate_suppression_seconds(),
         }
     }
 }
@@ -155,6 +161,7 @@ mod tests {
         let policy = DecisionPolicy::default();
         assert_eq!(policy.threshold, 0.5);
         assert_eq!(policy.confirmation_hits, 1);
-        assert_eq!(policy.cooldown_seconds, 1.0);
+        assert_eq!(policy.cooldown_seconds, 2.0);
+        assert_eq!(policy.duplicate_suppression_seconds, 4.0);
     }
 }

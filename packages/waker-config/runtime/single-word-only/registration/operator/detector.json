@@ -1,7 +1,8 @@
 {
   "decisionPolicy": {
     "confirmationHits": 1,
-    "cooldownSeconds": 1,
+    "cooldownSeconds": 2,
+    "duplicateSuppressionSeconds": 4,
     "threshold": 0.2
   },
   "detectorFormat": "waker-temporal-conv-registration-v1",

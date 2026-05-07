@@ -129,6 +129,7 @@ pub struct WakerWasmDetector {
     threshold: f32,
     confirmation_hits: u32,
     cooldown_seconds: f32,
+    duplicate_suppression_seconds: f32,
 
     // Registration metadata
     keyword: String,
@@ -176,7 +177,8 @@ impl WakerWasmDetector {
             decision_state: DecisionState::new(),
             threshold: 0.5,
             confirmation_hits: 1,
-            cooldown_seconds: 1.0,
+            cooldown_seconds: 2.0,
+            duplicate_suppression_seconds: 4.0,
             keyword: String::new(),
             chosen_wake_form: String::new(),
             accepted_wake_forms: Vec::new(),
@@ -288,6 +290,7 @@ impl WakerWasmDetector {
         self.threshold = policy.threshold;
         self.confirmation_hits = policy.confirmation_hits;
         self.cooldown_seconds = policy.cooldown_seconds;
+        self.duplicate_suppression_seconds = policy.duplicate_suppression_seconds;
 
         // Registration metadata
         self.keyword = registration.requested_keyword;
@@ -343,6 +346,7 @@ impl WakerWasmDetector {
         self.threshold = 0.5;
         self.confirmation_hits = 1;
         self.cooldown_seconds = 0.0;
+        self.duplicate_suppression_seconds = 0.0;
         self.keyword.clear();
         self.chosen_wake_form.clear();
         self.accepted_wake_forms.clear();
@@ -490,6 +494,7 @@ impl WakerWasmDetector {
             self.threshold,
             self.confirmation_hits,
             self.cooldown_seconds,
+            self.duplicate_suppression_seconds,
             now_ms,
         );
 
@@ -604,6 +609,7 @@ impl WakerWasmDetector {
             self.threshold,
             self.confirmation_hits,
             self.cooldown_seconds,
+            self.duplicate_suppression_seconds,
             now_ms,
         );
 
