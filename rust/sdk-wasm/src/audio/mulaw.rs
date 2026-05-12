@@ -9,11 +9,7 @@ const INT16_NORMALIZATION: f32 = 32_768.0;
 #[inline]
 fn decode_sample(value: u8) -> f32 {
     let mu_law_byte = (!value) as i32 & 0xFF;
-    let sign: f32 = if (mu_law_byte & 0x80) != 0 {
-        -1.0
-    } else {
-        1.0
-    };
+    let sign: f32 = if (mu_law_byte & 0x80) != 0 { -1.0 } else { 1.0 };
     let exponent = (mu_law_byte >> 4) & 0x07;
     let mantissa = mu_law_byte & 0x0F;
     let magnitude = ((mantissa << 3) + MULAW_BIAS) << exponent;

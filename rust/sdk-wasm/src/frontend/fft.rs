@@ -59,7 +59,11 @@ impl FftProcessor {
 
         // Execute FFT
         self.fft
-            .process_with_scratch(&mut self.real_buf, &mut self.complex_buf, &mut self.planner_scratch)
+            .process_with_scratch(
+                &mut self.real_buf,
+                &mut self.complex_buf,
+                &mut self.planner_scratch,
+            )
             .expect("FFT processing failed");
 
         // Compute magnitude squared

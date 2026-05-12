@@ -34,7 +34,8 @@ fn conv1d_same_channel(
     for t in 0..time_len {
         let left_idx = if t >= dilation { t - dilation } else { 0 };
         let right_idx = (t + dilation).min(time_len - 1);
-        output[t] = input[left_idx] * kernel[0] + input[t] * kernel[1] + input[right_idx] * kernel[2];
+        output[t] =
+            input[left_idx] * kernel[0] + input[t] * kernel[1] + input[right_idx] * kernel[2];
     }
 }
 

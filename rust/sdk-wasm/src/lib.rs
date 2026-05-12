@@ -36,7 +36,10 @@ use audio::resample;
 use audio::ring_buffer::RingBuffer;
 use backbone::forward as backbone_forward;
 use backbone::weights::BackboneWeights;
-use config::{DetectorConfig, Registration, RuntimeBackboneConfig};
+use config::{
+    DetectorConfig, Registration, RuntimeBackboneConfig, ScoreModifierModel, ScoreModifierPolicy,
+    ScoreModifierTargetModels,
+};
 use detector::decision::DecisionState;
 use detector::head::{self, HeadConfig};
 use detector::projection;
@@ -52,6 +55,154 @@ const DEFAULT_INPUT_MEL_FRAMES: usize = 198;
 const DEFAULT_N_MELS: usize = 32;
 const DEFAULT_SEQUENCE_LENGTH: usize = 49;
 const DEFAULT_EMBEDDING_DIM: usize = 96;
+
+fn bounded_logit_adjust(score: f32, risk: f32, penalty: f32) -> f32 {
+    let clipped = score.clamp(1.0e-5, 1.0 - 1.0e-5);
+    let logit = (clipped / (1.0 - clipped)).ln();
+    let adjusted = (logit - penalty * risk).clamp(-40.0, 40.0);
+    1.0 / (1.0 + (-adjusted).exp())
+}
+
+fn unit_dot(lhs: &[f32], rhs: &[f32]) -> Option<f32> {
+    if lhs.len() != rhs.len() || lhs.is_empty() {
+        return None;
+    }
+    Some(lhs.iter().zip(rhs.iter()).map(|(a, b)| a * b).sum())
+}
+
+fn score_modifier_frame_dot(
+    sequence: &[f32],
+    frame: usize,
+    embedding_dim: usize,
+    direction: &[f32],
+) -> Option<f32> {
+    let start = frame.checked_mul(embedding_dim)?;
+    let end = start.checked_add(embedding_dim)?;
+    unit_dot(sequence.get(start..end)?, direction)
+}
+
+fn score_modifier_mean_pool_dot(
+    sequence: &[f32],
+    sequence_length: usize,
+    embedding_dim: usize,
+    direction: &[f32],
+    start_frame: usize,
+    end_frame: usize,
+) -> Option<f32> {
+    if direction.len() != embedding_dim || sequence.len() < sequence_length * embedding_dim {
+        return None;
+    }
+    let start = start_frame.min(sequence_length.saturating_sub(1));
+    let end = end_frame.min(sequence_length).max(start + 1);
+    let mut total = 0.0f32;
+    for frame in start..end {
+        total += score_modifier_frame_dot(sequence, frame, embedding_dim, direction)?;
+    }
+    Some(total / (end - start) as f32)
+}
+
+fn score_modifier_model_risk(
+    sequence: &[f32],
+    sequence_length: usize,
+    embedding_dim: usize,
+    model: &ScoreModifierModel,
+    risk_cap: f32,
+    sliding_window_fraction: f32,
+) -> f32 {
+    let direction = model.direction.as_slice();
+    if direction.len() != embedding_dim || sequence.len() < sequence_length * embedding_dim {
+        return 0.0;
+    }
+    let center = model.center.unwrap_or(0.0);
+    let scale = model.scale.unwrap_or(1.0).max(1.0e-6);
+    let pool = model.pool.as_deref().unwrap_or("mean");
+    let raw = match pool {
+        "recent" => {
+            let frames = ((0.35 * sequence_length as f32).ceil() as usize)
+                .max(2)
+                .min(sequence_length);
+            score_modifier_mean_pool_dot(
+                sequence,
+                sequence_length,
+                embedding_dim,
+                direction,
+                sequence_length.saturating_sub(frames),
+                sequence_length,
+            )
+        }
+        "sliding_onset" => {
+            let frames = ((sliding_window_fraction * sequence_length as f32).ceil() as usize)
+                .max(2)
+                .min(sequence_length);
+            let mut best: Option<f32> = None;
+            for start in 0..=sequence_length.saturating_sub(frames) {
+                if let Some(value) = score_modifier_mean_pool_dot(
+                    sequence,
+                    sequence_length,
+                    embedding_dim,
+                    direction,
+                    start,
+                    start + frames,
+                ) {
+                    best = Some(best.map_or(value, |current| current.max(value)));
+                }
+            }
+            best
+        }
+        "centroid_peak_pre" => {
+            if let Some(locator) = model.locator_direction.as_deref() {
+                if locator.len() == embedding_dim {
+                    let frames = ((sliding_window_fraction * sequence_length as f32).ceil()
+                        as usize)
+                        .max(2)
+                        .min(sequence_length);
+                    let mut peak_frame = 0usize;
+                    let mut peak_score = f32::NEG_INFINITY;
+                    for frame in 0..sequence_length {
+                        if let Some(value) =
+                            score_modifier_frame_dot(sequence, frame, embedding_dim, locator)
+                        {
+                            if value > peak_score {
+                                peak_score = value;
+                                peak_frame = frame;
+                            }
+                        }
+                    }
+                    let start = peak_frame.saturating_sub(frames.saturating_sub(1));
+                    score_modifier_mean_pool_dot(
+                        sequence,
+                        sequence_length,
+                        embedding_dim,
+                        direction,
+                        start,
+                        peak_frame + 1,
+                    )
+                } else {
+                    None
+                }
+            } else {
+                score_modifier_mean_pool_dot(
+                    sequence,
+                    sequence_length,
+                    embedding_dim,
+                    direction,
+                    0,
+                    sequence_length,
+                )
+            }
+        }
+        _ => score_modifier_mean_pool_dot(
+            sequence,
+            sequence_length,
+            embedding_dim,
+            direction,
+            0,
+            sequence_length,
+        ),
+    };
+    raw.map(|value| ((value - center) / scale).max(0.0).min(risk_cap))
+        .unwrap_or(0.0)
+}
 
 // ─── Detection result ────────────────────────────────────────────────────────
 
@@ -130,6 +281,7 @@ pub struct WakerWasmDetector {
     confirmation_hits: u32,
     cooldown_seconds: f32,
     duplicate_suppression_seconds: f32,
+    score_modifier_policy: Option<ScoreModifierPolicy>,
 
     // Registration metadata
     keyword: String,
@@ -162,8 +314,7 @@ impl WakerWasmDetector {
     /// Create a new detector instance.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        let buffer_size =
-            (DEFAULT_SAMPLE_RATE as f32 * DEFAULT_CLIP_DURATION_SECONDS) as usize;
+        let buffer_size = (DEFAULT_SAMPLE_RATE as f32 * DEFAULT_CLIP_DURATION_SECONDS) as usize;
         Self {
             ring_buffer: RingBuffer::new(buffer_size),
             capture_sample_rate: DEFAULT_CAPTURE_SAMPLE_RATE,
@@ -179,6 +330,7 @@ impl WakerWasmDetector {
             confirmation_hits: 1,
             cooldown_seconds: 2.0,
             duplicate_suppression_seconds: 4.0,
+            score_modifier_policy: None,
             keyword: String::new(),
             chosen_wake_form: String::new(),
             accepted_wake_forms: Vec::new(),
@@ -291,6 +443,7 @@ impl WakerWasmDetector {
         self.confirmation_hits = policy.confirmation_hits;
         self.cooldown_seconds = policy.cooldown_seconds;
         self.duplicate_suppression_seconds = policy.duplicate_suppression_seconds;
+        self.score_modifier_policy = policy.score_modifier_policy.clone();
 
         // Registration metadata
         self.keyword = registration.requested_keyword;
@@ -319,12 +472,15 @@ impl WakerWasmDetector {
     ) -> Result<(), JsValue> {
         let runtime_backbone: RuntimeBackboneConfig = serde_json::from_str(runtime_backbone_json)
             .map_err(|e| {
-                JsValue::from_str(&format!(
-                    "Failed to parse runtime backbone config: {e}"
-                ))
-            })?;
+            JsValue::from_str(&format!("Failed to parse runtime backbone config: {e}"))
+        })?;
 
-        self.apply_runtime_backbone_config(Some(&runtime_backbone), None, None, capture_sample_rate);
+        self.apply_runtime_backbone_config(
+            Some(&runtime_backbone),
+            None,
+            None,
+            capture_sample_rate,
+        );
 
         let projected_dim = self.embedding_dim;
         let mut identity = vec![0.0f32; projected_dim * projected_dim];
@@ -375,7 +531,8 @@ impl WakerWasmDetector {
         let expected_len = self.clip_buf.len();
         if pcm16k.len() >= expected_len {
             let start = pcm16k.len() - expected_len;
-            self.clip_buf.copy_from_slice(&pcm16k[start..start + expected_len]);
+            self.clip_buf
+                .copy_from_slice(&pcm16k[start..start + expected_len]);
         } else {
             self.clip_buf.fill(0.0);
             self.clip_buf[..pcm16k.len()].copy_from_slice(pcm16k);
@@ -398,12 +555,11 @@ impl WakerWasmDetector {
     /// It returns the mel spectrogram as a flat Float32Array for the JS side to
     /// pass to the ONNX backbone.
     #[wasm_bindgen(js_name = "processAudioToMel")]
-    pub fn process_audio_to_mel(
-        &mut self,
-        chunk: &[u8],
-    ) -> Result<Option<Vec<f32>>, JsValue> {
+    pub fn process_audio_to_mel(&mut self, chunk: &[u8]) -> Result<Option<Vec<f32>>, JsValue> {
         if !self.loaded {
-            return Err(JsValue::from_str("Detector not loaded. Call loadConfig() first."));
+            return Err(JsValue::from_str(
+                "Detector not loaded. Call loadConfig() first.",
+            ));
         }
 
         // Decode Mu-Law
@@ -449,7 +605,9 @@ impl WakerWasmDetector {
         now_ms: f64,
     ) -> Result<WakerDetectionResult, JsValue> {
         if !self.loaded {
-            return Err(JsValue::from_str("Detector not loaded. Call loadConfig() first."));
+            return Err(JsValue::from_str(
+                "Detector not loaded. Call loadConfig() first.",
+            ));
         }
 
         let expected_len = self.sequence_length * self.embedding_dim;
@@ -487,10 +645,11 @@ impl WakerWasmDetector {
 
         // Apply temperature calibration
         let calibrated_score = temperature::apply_temperature(raw_score, self.temperature);
+        let adjusted_score = self.apply_score_modifier(calibrated_score, backbone_output);
 
         // Apply decision logic
         let detected = self.decision_state.observe(
-            calibrated_score,
+            adjusted_score,
             self.threshold,
             self.confirmation_hits,
             self.cooldown_seconds,
@@ -500,7 +659,7 @@ impl WakerWasmDetector {
 
         Ok(WakerDetectionResult {
             detected,
-            score: calibrated_score,
+            score: adjusted_score,
             threshold: self.threshold,
             keyword: self.keyword.clone(),
             chosen_wake_form: self.chosen_wake_form.clone(),
@@ -542,7 +701,9 @@ impl WakerWasmDetector {
         now_ms: f64,
     ) -> Result<Option<WakerDetectionResult>, JsValue> {
         if !self.loaded {
-            return Err(JsValue::from_str("Detector not loaded. Call loadConfig() first."));
+            return Err(JsValue::from_str(
+                "Detector not loaded. Call loadConfig() first.",
+            ));
         }
         if !self.backbone_loaded {
             return Err(JsValue::from_str(
@@ -603,9 +764,10 @@ impl WakerWasmDetector {
 
         let raw_score = head::classify(&features, head_config);
         let calibrated_score = temperature::apply_temperature(raw_score, self.temperature);
+        let adjusted_score = self.apply_score_modifier(calibrated_score, &backbone_output);
 
         let detected = self.decision_state.observe(
-            calibrated_score,
+            adjusted_score,
             self.threshold,
             self.confirmation_hits,
             self.cooldown_seconds,
@@ -615,12 +777,84 @@ impl WakerWasmDetector {
 
         Ok(Some(WakerDetectionResult {
             detected,
-            score: calibrated_score,
+            score: adjusted_score,
             threshold: self.threshold,
             keyword: self.keyword.clone(),
             chosen_wake_form: self.chosen_wake_form.clone(),
             accepted_wake_forms: self.accepted_wake_forms.clone(),
         }))
+    }
+
+    fn apply_score_modifier(&self, score: f32, backbone_output: &[f32]) -> f32 {
+        let Some(policy) = self.score_modifier_policy.as_ref() else {
+            return score;
+        };
+        let kind = policy.kind.as_deref().unwrap_or("");
+        if !matches!(
+            kind,
+            "bounded_logit_penalty"
+                | "v15_score_modifier"
+                | "target_conditioned_bounded_logit_penalty"
+        ) {
+            return score;
+        }
+        let penalty = policy.penalty.unwrap_or(0.0).max(0.0);
+        if penalty <= 0.0 {
+            return score;
+        }
+        let risk_cap = policy.risk_cap.unwrap_or(3.0).max(0.0);
+        let sliding_window_fraction = policy
+            .sliding_window_fraction
+            .unwrap_or(0.18)
+            .clamp(0.01, 1.0);
+        let mut total_risk = 0.0f32;
+        for model in self.score_modifier_models(policy) {
+            let weight = self.score_modifier_component_weight(policy, model);
+            total_risk += weight
+                * score_modifier_model_risk(
+                    backbone_output,
+                    self.sequence_length,
+                    self.embedding_dim,
+                    model,
+                    risk_cap,
+                    sliding_window_fraction,
+                );
+        }
+        if total_risk <= 0.0 {
+            return score;
+        }
+        bounded_logit_adjust(score, total_risk, penalty)
+    }
+
+    fn score_modifier_models<'a>(
+        &'a self,
+        policy: &'a ScoreModifierPolicy,
+    ) -> Vec<&'a ScoreModifierModel> {
+        match &policy.target_models {
+            ScoreModifierTargetModels::List(models) => models.iter().collect(),
+            ScoreModifierTargetModels::ByTarget(by_target) => by_target
+                .get(&self.keyword)
+                .or_else(|| by_target.get(&self.chosen_wake_form))
+                .into_iter()
+                .flat_map(|models| models.iter())
+                .collect(),
+        }
+    }
+
+    fn score_modifier_component_weight(
+        &self,
+        policy: &ScoreModifierPolicy,
+        model: &ScoreModifierModel,
+    ) -> f32 {
+        let Some(model_component_id) = model.component_id.as_deref() else {
+            return 1.0;
+        };
+        policy
+            .components
+            .iter()
+            .find(|component| component.component_id.as_deref() == Some(model_component_id))
+            .and_then(|component| component.weight)
+            .unwrap_or(1.0)
     }
 
     /// Reset the detector state (ring buffer, decision state).

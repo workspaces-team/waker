@@ -162,7 +162,9 @@ pub fn train_custom_head_artifact(
     let positive_count = labels.iter().filter(|&&label| label > 0).count();
     let negative_count = labels.len().saturating_sub(positive_count);
     if positive_count == 0 || negative_count == 0 {
-        return Err("Training requires at least one positive and one negative example.".to_string());
+        return Err(
+            "Training requires at least one positive and one negative example.".to_string(),
+        );
     }
 
     let w_effective = normalize_w_effective(config.w_effective.clone(), embedding_dim)?;
@@ -191,8 +193,13 @@ pub fn train_custom_head_artifact(
     let (train_indices, validation_indices) =
         stratified_split(labels, hyper.validation_split.clamp(0.0, 0.49));
     let train_stats = compute_feature_stats(&features, &train_indices, feature_dim)?;
-    let standardized_train =
-        standardize_rows(&features, &train_indices, feature_dim, &train_stats.mean, &train_stats.std);
+    let standardized_train = standardize_rows(
+        &features,
+        &train_indices,
+        feature_dim,
+        &train_stats.mean,
+        &train_stats.std,
+    );
     let positive_rate = (train_indices
         .iter()
         .filter(|&&index| labels[index] > 0)
@@ -206,9 +213,18 @@ pub fn train_custom_head_artifact(
         let mut grad_w = vec![0.0f32; feature_dim];
         let mut grad_b = 0.0f32;
         for (row_position, &sample_index) in train_indices.iter().enumerate() {
-            let row = &standardized_train[row_position * feature_dim..(row_position + 1) * feature_dim];
-            let label = if labels[sample_index] > 0 { 1.0f32 } else { 0.0f32 };
-            let sample_weight = if label > 0.5 { 1.0 } else { hyper.negative_weight };
+            let row =
+                &standardized_train[row_position * feature_dim..(row_position + 1) * feature_dim];
+            let label = if labels[sample_index] > 0 {
+                1.0f32
+            } else {
+                0.0f32
+            };
+            let sample_weight = if label > 0.5 {
+                1.0
+            } else {
+                hyper.negative_weight
+            };
             let logit = dot(row, &weights) + bias;
             let prob = sigmoid(logit);
             let pt = if label > 0.5 { prob } else { 1.0 - prob };
@@ -221,7 +237,8 @@ pub fn train_custom_head_artifact(
         }
         let denom = train_indices.len().max(1) as f32;
         for feature_index in 0..feature_dim {
-            grad_w[feature_index] = grad_w[feature_index] / denom + hyper.l2_reg * weights[feature_index];
+            grad_w[feature_index] =
+                grad_w[feature_index] / denom + hyper.l2_reg * weights[feature_index];
             weights[feature_index] -= hyper.learning_rate * grad_w[feature_index];
         }
         bias -= hyper.learning_rate * (grad_b / denom);
@@ -233,7 +250,13 @@ pub fn train_custom_head_artifact(
     }
     let bias_raw = bias - dot(&train_stats.mean, &weights_raw);
 
-    let train_scores = score_rows(&features, &train_indices, feature_dim, &weights_raw, bias_raw);
+    let train_scores = score_rows(
+        &features,
+        &train_indices,
+        feature_dim,
+        &weights_raw,
+        bias_raw,
+    );
     let validation_scores = if validation_indices.is_empty() {
         Vec::new()
     } else {
@@ -250,7 +273,10 @@ pub fn train_custom_head_artifact(
         let labels_for_selection: Vec<u8> = if validation_indices.is_empty() {
             train_indices.iter().map(|&index| labels[index]).collect()
         } else {
-            validation_indices.iter().map(|&index| labels[index]).collect()
+            validation_indices
+                .iter()
+                .map(|&index| labels[index])
+                .collect()
         };
         let scores_for_selection: &[f32] = if validation_indices.is_empty() {
             &train_scores
@@ -265,7 +291,10 @@ pub fn train_custom_head_artifact(
     });
 
     let train_accuracy = accuracy(
-        &train_indices.iter().map(|&index| labels[index]).collect::<Vec<_>>(),
+        &train_indices
+            .iter()
+            .map(|&index| labels[index])
+            .collect::<Vec<_>>(),
         &train_scores,
         selected_threshold,
     );
@@ -273,7 +302,10 @@ pub fn train_custom_head_artifact(
         None
     } else {
         Some(accuracy(
-            &validation_indices.iter().map(|&index| labels[index]).collect::<Vec<_>>(),
+            &validation_indices
+                .iter()
+                .map(|&index| labels[index])
+                .collect::<Vec<_>>(),
             &validation_scores,
             selected_threshold,
         ))
@@ -323,6 +355,7 @@ pub fn train_custom_head_artifact(
             confirmation_hits: hyper.confirmation_hits,
             cooldown_seconds: hyper.cooldown_seconds,
             duplicate_suppression_seconds: hyper.duplicate_suppression_seconds,
+            score_modifier_policy: None,
         }),
         head: HeadJsonConfig {
             hidden_width: hyper.hidden_width,
@@ -365,8 +398,7 @@ pub fn train_custom_head_artifact(
         },
     };
 
-    serde_json::to_string(&artifact)
-        .map_err(|e| format!("Failed to serialize head artifact: {e}"))
+    serde_json::to_string(&artifact).map_err(|e| format!("Failed to serialize head artifact: {e}"))
 }
 
 fn normalize_runtime_backbone(config: Option<RuntimeBackboneConfig>) -> RuntimeBackboneConfig {
@@ -491,8 +523,7 @@ fn build_feature_matrix(
     let mut projected = vec![0.0f32; sequence_length * projected_dim];
     for sample_index in 0..sample_count {
         let sample_offset = sample_index * sample_size;
-        let sample =
-            &flattened_sequences[sample_offset..sample_offset + sample_size];
+        let sample = &flattened_sequences[sample_offset..sample_offset + sample_size];
         projection::apply_w_effective(
             sample,
             sequence_length,
@@ -501,15 +532,10 @@ fn build_feature_matrix(
             projected_dim,
             &mut projected,
         );
-        let sample_features = head::temporal_conv_features(
-            &projected,
-            sequence_length,
-            projected_dim,
-            head_config,
-        );
+        let sample_features =
+            head::temporal_conv_features(&projected, sequence_length, projected_dim, head_config);
         let feature_offset = sample_index * feature_dim;
-        features[feature_offset..feature_offset + feature_dim]
-            .copy_from_slice(&sample_features);
+        features[feature_offset..feature_offset + feature_dim].copy_from_slice(&sample_features);
     }
     features
 }
@@ -562,8 +588,7 @@ fn standardize_rows(
     let mut output = vec![0.0f32; indices.len() * feature_dim];
     for (row_position, &sample_index) in indices.iter().enumerate() {
         let source = &features[sample_index * feature_dim..(sample_index + 1) * feature_dim];
-        let destination =
-            &mut output[row_position * feature_dim..(row_position + 1) * feature_dim];
+        let destination = &mut output[row_position * feature_dim..(row_position + 1) * feature_dim];
         for feature_index in 0..feature_dim {
             destination[feature_index] =
                 (source[feature_index] - mean[feature_index]) / std[feature_index];

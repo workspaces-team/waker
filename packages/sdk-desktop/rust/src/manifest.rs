@@ -28,10 +28,7 @@ impl BundleManifest {
         let mut errors = Vec::new();
 
         if self.family != "waker-desktop" {
-            errors.push(format!(
-                "family must be waker-desktop, got {}",
-                self.family
-            ));
+            errors.push(format!("family must be waker-desktop, got {}", self.family));
         }
         if self.frontend_contract.trim().is_empty() {
             errors.push("frontendContract must be non-empty".to_string());
@@ -56,7 +53,10 @@ pub fn load_bundle_manifest(bundle_url: &str) -> Result<BundleManifest> {
 
     let errors = manifest.validate();
     if !errors.is_empty() {
-        bail!("bundle manifest validation failed:\n- {}", errors.join("\n- "));
+        bail!(
+            "bundle manifest validation failed:\n- {}",
+            errors.join("\n- ")
+        );
     }
 
     Ok(manifest)

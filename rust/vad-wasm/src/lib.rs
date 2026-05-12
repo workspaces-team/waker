@@ -231,7 +231,9 @@ impl SileroVadDetector {
     /// Returns the speech probability.
     pub fn process(&mut self, chunk: &[f32]) -> Result<VadResult, JsValue> {
         if !self.loaded {
-            return Err(JsValue::from_str("Model not loaded. Call loadModel() first."));
+            return Err(JsValue::from_str(
+                "Model not loaded. Call loadModel() first.",
+            ));
         }
         if chunk.len() != 512 {
             return Err(JsValue::from_str(&format!(
@@ -254,7 +256,9 @@ impl SileroVadDetector {
     #[wasm_bindgen(js_name = "processWithEvents")]
     pub fn process_with_events(&mut self, chunk: &[f32]) -> Result<VadEventResult, JsValue> {
         if !self.loaded {
-            return Err(JsValue::from_str("Model not loaded. Call loadModel() first."));
+            return Err(JsValue::from_str(
+                "Model not loaded. Call loadModel() first.",
+            ));
         }
         if chunk.len() != 512 {
             return Err(JsValue::from_str(&format!(

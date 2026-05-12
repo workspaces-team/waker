@@ -109,11 +109,8 @@ impl LogMelFrontend {
 
             // Apply Hanning window
             for i in 0..frame_length {
-                self.windowed_frame[i] = waveform
-                    .get(start + i)
-                    .copied()
-                    .unwrap_or(0.0)
-                    * self.hanning_window[i];
+                self.windowed_frame[i] =
+                    waveform.get(start + i).copied().unwrap_or(0.0) * self.hanning_window[i];
             }
             // Zero-pad beyond frame_length (for FFT size)
             let fft_size = self.windowed_frame.len();
@@ -126,7 +123,8 @@ impl LogMelFrontend {
                 .power_spectrum(&self.windowed_frame, frame_length, &mut self.power_buf);
 
             // Apply mel filterbank
-            self.filterbank.apply(&self.power_buf, &mut self.mel_row_buf);
+            self.filterbank
+                .apply(&self.power_buf, &mut self.mel_row_buf);
 
             raw_frames.extend_from_slice(&self.mel_row_buf);
         }

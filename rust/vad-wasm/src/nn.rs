@@ -126,10 +126,10 @@ pub fn lstm_step(
 
     // Split into 4 gates and apply activations
     for j in 0..hidden_size {
-        let i_gate = sigmoid(gates[j]);                          // input gate
-        let f_gate = sigmoid(gates[hidden_size + j]);            // forget gate
-        let g_gate = gates[hidden_size * 2 + j].tanh();         // cell gate
-        let o_gate = sigmoid(gates[hidden_size * 3 + j]);       // output gate
+        let i_gate = sigmoid(gates[j]); // input gate
+        let f_gate = sigmoid(gates[hidden_size + j]); // forget gate
+        let g_gate = gates[hidden_size * 2 + j].tanh(); // cell gate
+        let o_gate = sigmoid(gates[hidden_size * 3 + j]); // output gate
 
         c[j] = f_gate * c[j] + i_gate * g_gate;
         h[j] = o_gate * c[j].tanh();

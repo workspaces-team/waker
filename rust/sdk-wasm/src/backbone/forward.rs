@@ -26,7 +26,14 @@ const DILATIONS: [usize; 4] = [1, 2, 4, 8];
 // ─── Helper ops ──────────────────────────────────────────────────────────────
 
 /// MatMul: [T, K] × [K, N] → [T, N]
-fn matmul_add(input: &[f32], weight: &[f32], bias: &[f32], t: usize, k: usize, n: usize) -> Vec<f32> {
+fn matmul_add(
+    input: &[f32],
+    weight: &[f32],
+    bias: &[f32],
+    t: usize,
+    k: usize,
+    n: usize,
+) -> Vec<f32> {
     let mut out = vec![0.0f32; t * n];
     for i in 0..t {
         for j in 0..n {
@@ -101,8 +108,7 @@ fn depthwise_conv1d(
             for k in 0..kernel_size {
                 let in_pos = (t + k * dilation) as isize - padding as isize;
                 if in_pos >= 0 && (in_pos as usize) < time_len {
-                    sum += input[ch * time_len + in_pos as usize]
-                        * weight[ch * kernel_size + k];
+                    sum += input[ch * time_len + in_pos as usize] * weight[ch * kernel_size + k];
                 }
             }
             output[ch * out_len + t] = sum;
@@ -192,7 +198,13 @@ pub fn forward(mel: &[f32], weights: &BackboneWeights) -> Vec<f32> {
     let mut x = transpose_2d(&projected, TIME_LEN, CHANNELS);
 
     // ── 3. GroupNorm 0 ──
-    group_norm(&mut x, CHANNELS, TIME_LEN, &weights.gnorms[0].scale, &weights.gnorms[0].shift);
+    group_norm(
+        &mut x,
+        CHANNELS,
+        TIME_LEN,
+        &weights.gnorms[0].scale,
+        &weights.gnorms[0].shift,
+    );
 
     // ── 4. Four depthwise-separable blocks ──
     //

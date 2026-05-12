@@ -14,8 +14,8 @@ use crate::weights::SileroWeights;
 
 /// Internal state for the LSTM (persisted across chunks).
 pub struct VadState {
-    pub h: Vec<f32>,  // [128]
-    pub c: Vec<f32>,  // [128]
+    pub h: Vec<f32>,       // [128]
+    pub c: Vec<f32>,       // [128]
     pub context: Vec<f32>, // internal context buffer for cross-chunk continuity
 }
 
@@ -50,12 +50,12 @@ impl Default for VadState {
 /// Run a single forward pass on a 512-sample chunk at 16 kHz.
 ///
 /// Returns the speech probability in [0.0, 1.0].
-pub fn forward(
-    audio_chunk: &[f32],
-    weights: &SileroWeights,
-    state: &mut VadState,
-) -> f32 {
-    debug_assert_eq!(audio_chunk.len(), 512, "Silero v5 requires exactly 512 samples at 16kHz");
+pub fn forward(audio_chunk: &[f32], weights: &SileroWeights, state: &mut VadState) -> f32 {
+    debug_assert_eq!(
+        audio_chunk.len(),
+        512,
+        "Silero v5 requires exactly 512 samples at 16kHz"
+    );
 
     // Prepend context from previous chunk
     let mut full_input = Vec::with_capacity(CONTEXT_SIZE_16K + 512);
@@ -63,7 +63,9 @@ pub fn forward(
     full_input.extend_from_slice(audio_chunk);
 
     // Save context for next chunk (last CONTEXT_SIZE_16K samples)
-    state.context.copy_from_slice(&audio_chunk[512 - CONTEXT_SIZE_16K..]);
+    state
+        .context
+        .copy_from_slice(&audio_chunk[512 - CONTEXT_SIZE_16K..]);
 
     let input_len = full_input.len();
 
@@ -106,18 +108,48 @@ pub fn forward(
 
     // Conv1: [128, T] → [64, T/2] (k=3, s=2, p=1) + ReLU
     let new_len = (enc_len + 2 * 1 - 3) / 2 + 1;
-    x = nn::conv1d(&x, 128, enc_len, &weights.enc1_w, &weights.enc1_b, 64, 3, 2, 1);
+    x = nn::conv1d(
+        &x,
+        128,
+        enc_len,
+        &weights.enc1_w,
+        &weights.enc1_b,
+        64,
+        3,
+        2,
+        1,
+    );
     nn::relu_inplace(&mut x);
     enc_len = new_len;
 
     // Conv2: [64, T/2] → [64, T/4] (k=3, s=2, p=1) + ReLU
     let new_len = (enc_len + 2 * 1 - 3) / 2 + 1;
-    x = nn::conv1d(&x, 64, enc_len, &weights.enc2_w, &weights.enc2_b, 64, 3, 2, 1);
+    x = nn::conv1d(
+        &x,
+        64,
+        enc_len,
+        &weights.enc2_w,
+        &weights.enc2_b,
+        64,
+        3,
+        2,
+        1,
+    );
     nn::relu_inplace(&mut x);
     enc_len = new_len;
 
     // Conv3: [128, T/4] → [128, T/4] (k=3, s=1, p=1) + ReLU
-    x = nn::conv1d(&x, 64, enc_len, &weights.enc3_w, &weights.enc3_b, 128, 3, 1, 1);
+    x = nn::conv1d(
+        &x,
+        64,
+        enc_len,
+        &weights.enc3_w,
+        &weights.enc3_b,
+        128,
+        3,
+        1,
+        1,
+    );
     nn::relu_inplace(&mut x);
     // enc_len stays the same (stride=1, p=1)
 

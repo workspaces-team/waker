@@ -33,8 +33,8 @@ impl WakerDesktopNativeDetector {
     #[napi]
     pub fn load(&mut self, bundle_url: String) -> napi::Result<String> {
         let manifest = load_bundle_manifest(&bundle_url).map_err(to_napi_error)?;
-        let manifest_json = serde_json::to_string(&manifest)
-            .map_err(|error| to_napi_error(error.into()))?;
+        let manifest_json =
+            serde_json::to_string(&manifest).map_err(|error| to_napi_error(error.into()))?;
 
         self.bundle_url = Some(bundle_url);
         self.manifest = Some(manifest);

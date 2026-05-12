@@ -38,6 +38,8 @@ pub struct DecisionPolicy {
     pub cooldown_seconds: f32,
     #[serde(default = "default_duplicate_suppression_seconds")]
     pub duplicate_suppression_seconds: f32,
+    #[serde(default)]
+    pub score_modifier_policy: Option<ScoreModifierPolicy>,
 }
 
 fn default_threshold() -> f32 {
@@ -60,8 +62,65 @@ impl Default for DecisionPolicy {
             confirmation_hits: default_confirmation_hits(),
             cooldown_seconds: default_cooldown_seconds(),
             duplicate_suppression_seconds: default_duplicate_suppression_seconds(),
+            score_modifier_policy: None,
         }
     }
+}
+
+/// Bounded side-score policy applied after head temperature calibration.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreModifierPolicy {
+    pub kind: Option<String>,
+    #[serde(default)]
+    pub variant_id: Option<String>,
+    #[serde(default)]
+    pub penalty: Option<f32>,
+    #[serde(default)]
+    pub risk_cap: Option<f32>,
+    #[serde(default)]
+    pub sliding_window_fraction: Option<f32>,
+    #[serde(default)]
+    pub components: Vec<ScoreModifierComponent>,
+    #[serde(default)]
+    pub target_models: ScoreModifierTargetModels,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreModifierComponent {
+    pub component_id: Option<String>,
+    #[serde(default)]
+    pub weight: Option<f32>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ScoreModifierTargetModels {
+    List(Vec<ScoreModifierModel>),
+    ByTarget(std::collections::BTreeMap<String, Vec<ScoreModifierModel>>),
+}
+
+impl Default for ScoreModifierTargetModels {
+    fn default() -> Self {
+        Self::List(Vec::new())
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScoreModifierModel {
+    pub component_id: Option<String>,
+    #[serde(default)]
+    pub pool: Option<String>,
+    #[serde(default)]
+    pub direction: Vec<f32>,
+    #[serde(default)]
+    pub center: Option<f32>,
+    #[serde(default)]
+    pub scale: Option<f32>,
+    #[serde(default)]
+    pub locator_direction: Option<Vec<f32>>,
 }
 
 /// wEffective matrix shape and data within detector.json

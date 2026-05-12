@@ -17,7 +17,9 @@ pub fn resample(input: &[f32], source_rate: u32, target_rate: u32, output: &mut 
 
     for out_idx in 0..output_len {
         let start = (out_idx as f64 * ratio).floor() as usize;
-        let end = ((out_idx + 1) as f64 * ratio).floor().min(input.len() as f64) as usize;
+        let end = ((out_idx + 1) as f64 * ratio)
+            .floor()
+            .min(input.len() as f64) as usize;
         if end <= start {
             output.push(0.0);
             continue;

@@ -12,8 +12,7 @@ pub fn build_projection_matrix(input_dim: usize, output_dim: usize) -> Vec<f32> 
         let row_offset = out_idx * input_dim;
         let mut norm_sq = 0.0f32;
         for in_idx in 0..input_dim {
-            let phase =
-                (PI / input_dim as f32) * (out_idx as f32 + 0.5) * (in_idx as f32 + 0.5);
+            let phase = (PI / input_dim as f32) * (out_idx as f32 + 0.5) * (in_idx as f32 + 0.5);
             let val = phase.cos();
             matrix[row_offset + in_idx] = val;
             norm_sq += val * val;
@@ -74,10 +73,7 @@ mod tests {
             let offset = row_idx * 96;
             let norm_sq: f32 = (0..96).map(|i| mat[offset + i] * mat[offset + i]).sum();
             let norm = norm_sq.sqrt();
-            assert!(
-                (norm - 1.0).abs() < 0.01,
-                "row {row_idx} norm = {norm}"
-            );
+            assert!((norm - 1.0).abs() < 0.01, "row {row_idx} norm = {norm}");
         }
     }
 

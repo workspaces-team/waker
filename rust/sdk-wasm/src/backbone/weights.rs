@@ -14,24 +14,24 @@ pub type WeightManifest = HashMap<String, WeightEntry>;
 
 /// Block weights for one depthwise-separable conv block.
 pub struct BlockWeights {
-    pub dw_w: Vec<f32>,    // [128, 1, 5] depthwise
-    pub dw_b: Vec<f32>,    // [128]
-    pub pw_in_w: Vec<f32>, // [256, 128, 1] point-wise expand
-    pub pw_in_b: Vec<f32>, // [256]
-    pub pw_out_w: Vec<f32>,// [128, 256, 1] point-wise project
-    pub pw_out_b: Vec<f32>,// [128]
+    pub dw_w: Vec<f32>,     // [128, 1, 5] depthwise
+    pub dw_b: Vec<f32>,     // [128]
+    pub pw_in_w: Vec<f32>,  // [256, 128, 1] point-wise expand
+    pub pw_in_b: Vec<f32>,  // [256]
+    pub pw_out_w: Vec<f32>, // [128, 256, 1] point-wise project
+    pub pw_out_b: Vec<f32>, // [128]
 }
 
 /// GroupNorm (InstanceNorm + scale/shift) parameters.
 pub struct GroupNormWeights {
-    pub scale: Vec<f32>,   // [128]
-    pub shift: Vec<f32>,   // [128]
+    pub scale: Vec<f32>, // [128]
+    pub shift: Vec<f32>, // [128]
 }
 
 /// All backbone weights.
 pub struct BackboneWeights {
-    pub input_proj_w: Vec<f32>,  // [32, 128]
-    pub input_proj_b: Vec<f32>,  // [128]
+    pub input_proj_w: Vec<f32>, // [32, 128]
+    pub input_proj_b: Vec<f32>, // [128]
 
     pub gnorms: [GroupNormWeights; 5], // before each block + final
 
